@@ -11,7 +11,7 @@
 
   <!-- Open Graph / Social Meta -->
   <meta property="og:title" content="The builds for IIT-H — Digital Ecosystem">
-  <meta property="og:description" content="Six flagship digital systems engineered for IIT Hyderabad. Zero-overhead, maximum velocity.">
+  <meta property="og:description" content="Seven digital systems designed, built and shipped for IIT Hyderabad. Five live on their own subdomains.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://iith.online">
   <meta name="twitter:card" content="summary_large_image">
@@ -29,7 +29,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="assets/style.css?v=2.1">
+  <link rel="stylesheet" href="assets/style.css?v=2.2">
 </head>
 <body>
 
@@ -64,6 +64,8 @@
           <li><a class="nav-link" href="#index" data-cursor="Index">Index</a></li>
           <li><a class="nav-link" href="#previews" data-cursor="Spotlight">Spotlight</a></li>
           <li><a class="nav-link" href="#status" data-cursor="Roadmap">Roadmap</a></li>
+          <li><a class="nav-link" href="#timeline" data-cursor="Timeline">Timeline</a></li>
+          <li><a class="nav-link" href="#stack" data-cursor="Stack">Stack</a></li>
           <li><a class="nav-link" href="#architecture" data-cursor="Architecture">Architecture</a></li>
         </ul>
       </nav>
@@ -95,23 +97,23 @@
         <div class="hero__metrics">
           <div class="metric-card">
             <div class="metric-card__val">07</div>
-            <div class="metric-card__lbl">Campus Systems</div>
-            <div class="metric-card__note">Active digital suites</div>
+            <div class="metric-card__lbl">Systems Built</div>
+            <div class="metric-card__note">For this campus</div>
           </div>
           <div class="metric-card">
-            <div class="metric-card__val">04</div>
-            <div class="metric-card__lbl">Live Deployments</div>
-            <div class="metric-card__note">Production subdomains</div>
+            <div class="metric-card__val">05</div>
+            <div class="metric-card__lbl">Live Right Now</div>
+            <div class="metric-card__note">Each on its own subdomain</div>
           </div>
           <div class="metric-card">
-            <div class="metric-card__val">5,000+</div>
-            <div class="metric-card__lbl">Student Community</div>
-            <div class="metric-card__note">Zero paper latency</div>
+            <div class="metric-card__val">00</div>
+            <div class="metric-card__lbl">Build Steps</div>
+            <div class="metric-card__note">No bundler, no framework</div>
           </div>
           <div class="metric-card">
-            <div class="metric-card__val">₹0.00</div>
-            <div class="metric-card__lbl">Server Fleet Cost</div>
-            <div class="metric-card__note">Serverless & static edge</div>
+            <div class="metric-card__val">00</div>
+            <div class="metric-card__lbl">Trackers</div>
+            <div class="metric-card__note">No cookies or analytics</div>
           </div>
         </div>
 
@@ -204,12 +206,34 @@
     </section>
 
     <!-- ══════════════════════════════════════════════════════════
-         04 — ARCHITECTURE & SUSTAINABILITY (INFRASTRUCTURE & BILL)
+         04 — BUILD TIMELINE
+         ══════════════════════════════════════════════════════════ -->
+    <section class="sec sec--alt" id="timeline">
+      <div class="wrap">
+        <p class="kicker"><span>04</span> Timeline</p>
+        <h2 class="sec__title">How it got here.</h2>
+        <ol class="tl" id="tl-list"></ol>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         05 — WHAT RUNS UNDERNEATH (STACK MATRIX)
+         ══════════════════════════════════════════════════════════ -->
+    <section class="sec" id="stack">
+      <div class="wrap">
+        <p class="kicker"><span>05</span> Under the Hood</p>
+        <h2 class="sec__title">What actually runs.</h2>
+        <div class="stackm" id="stack-matrix"></div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         06 — ARCHITECTURE & SUSTAINABILITY (INFRASTRUCTURE & BILL)
          ══════════════════════════════════════════════════════════ -->
     <section class="sec sec--alt" id="architecture">
       <div class="wrap">
-        <p class="kicker"><span>04</span> Architecture & Sustainability</p>
-        <h2 class="sec__title">Zero overhead. Maximum velocity.</h2>
+        <p class="kicker"><span>06</span> Architecture & Sustainability</p>
+        <h2 class="sec__title">Small stack. Cheap to run.</h2>
 
         <!-- 4 Pillar Architecture Grid -->
         <div class="arch-grid" id="arch-grid"></div>
@@ -240,6 +264,8 @@
           <li><a href="#index">Project Index</a></li>
           <li><a href="#previews">Screen Spotlight</a></li>
           <li><a href="#status">Mission Control</a></li>
+          <li><a href="#timeline">Build Timeline</a></li>
+          <li><a href="#stack">Under the Hood</a></li>
           <li><a href="#architecture">Architecture Specs</a></li>
         </ul>
       </div>
@@ -292,23 +318,36 @@
     <div class="detail-modal__body">
       <div class="detail-modal__header">
         <div>
-          <span class="badge-status badge-status--live" id="detail-modal-category">Category</span>
+          <div class="detail-modal__meta">
+            <span class="badge-status" id="detail-modal-status"></span>
+            <span class="detail-modal__cat" id="detail-modal-category">Category</span>
+          </div>
           <h2 class="detail-modal__title" id="detail-modal-title">Project Name</h2>
         </div>
-        <a class="btn-primary" id="detail-modal-launch" href="#" target="_blank" rel="noopener">Launch Deployment ↗</a>
+        <div class="detail-modal__cta">
+          <a class="btn-primary" id="detail-modal-launch" href="#" target="_blank" rel="noopener">Launch Live Project ↗</a>
+          <a class="btn-secondary" id="detail-modal-github" href="#" target="_blank" rel="noopener">View Source ↗</a>
+        </div>
       </div>
+
+      <p class="detail-modal__statusnote" id="detail-modal-statusnote"></p>
 
       <p id="detail-modal-blurb" style="font-size:15.5px; color:var(--text-secondary); line-height:1.6;"></p>
 
-      <h4 style="font-family:var(--font-display); font-size:18px; margin-top:24px;">Architectural Highlights</h4>
+      <h4 class="detail-modal__h4">What it does</h4>
       <ul class="detail-modal__highlights" id="detail-modal-highlights"></ul>
+
+      <div id="detail-modal-next-wrap">
+        <h4 class="detail-modal__h4">What’s next</h4>
+        <ul class="detail-modal__next" id="detail-modal-next"></ul>
+      </div>
 
       <div class="detail-modal__specs" id="detail-modal-specs"></div>
     </div>
   </dialog>
 
   <!-- Data and Application Scripts -->
-  <script src="assets/data.js?v=2.1"></script>
-  <script src="assets/app.js?v=2.1"></script>
+  <script src="assets/data.js?v=2.2"></script>
+  <script src="assets/app.js?v=2.2"></script>
 </body>
 </html>

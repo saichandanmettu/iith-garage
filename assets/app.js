@@ -19,6 +19,45 @@
   }
   function lerp(a, b, t) { return a + (b - a) * t; }
 
+  /* Status vocabulary — colour is never the only carrier of meaning,
+     so every badge ships an icon and a text label alongside the tone. */
+  function statusMeta(key) {
+    return (typeof STATUS !== 'undefined' && STATUS[key]) ? STATUS[key] : {
+      label: 'Coming soon', tone: 'soon', desc: '', icon: '<circle cx="12" cy="12" r="9"/>'
+    };
+  }
+
+  function makeStatusBadge(key, extraClass) {
+    var meta = statusMeta(key);
+    var span = el('span', 'badge-status badge-status--' + meta.tone + (extraClass ? ' ' + extraClass : ''));
+    span.innerHTML =
+      '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" ' +
+      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      meta.icon + '</svg>';
+    span.appendChild(el('span', null, meta.label));
+    span.title = meta.desc;
+    return span;
+  }
+
+  /* Shared scroll reveal. Under prefers-reduced-motion everything is
+     simply shown — the content must never depend on the animation. */
+  function revealOnScroll(nodes) {
+    var list = Array.prototype.slice.call(nodes);
+    if (reduce || !('IntersectionObserver' in window)) {
+      list.forEach(function (n) { n.classList.add('is-in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    list.forEach(function (n) { io.observe(n); });
+  }
+
   /* =========================================================
      1 — AMBIENT WEB AUDIO SYNTHESIS (MICRO-HAPTICS)
      Subtle acoustic clicks on interaction (ultra quiet, opt-in)
@@ -319,8 +358,7 @@
 
         // Action & Status
         var actBox = el('div', 'idx-row__actions');
-        var statusBadge = el('span', 'badge-status badge-status--' + p.status, p.status === 'live' ? 'Live' : 'Building');
-        actBox.appendChild(statusBadge);
+        actBox.appendChild(makeStatusBadge(p.status));
 
         var openBtn = el('button', 'btn-open-detail');
         openBtn.setAttribute('aria-label', 'Open deep dive for ' + p.name);
@@ -428,6 +466,8 @@
       var badge = el('div', 'spotlight-card__badge', p.zone + ' • ' + p.year);
       card.appendChild(badge);
 
+      card.appendChild(makeStatusBadge(p.status, 'spotlight-card__status'));
+
       card.addEventListener('click', function () {
         if (idx === activeSlide) {
           openProjectDetail(p);
@@ -465,7 +505,7 @@
       });
 
       if (titleEl) titleEl.textContent = p.name;
-      if (descEl) descEl.textContent = p.blurb;
+      if (descEl) descEl.textContent = p.statusNote || p.blurb;
 
       if (linkWrap) {
         linkWrap.innerHTML = '';
@@ -609,16 +649,22 @@
         var metaCol = el('div');
         if (typeof item.progress === 'number') {
           var pbox = el('div', 'progress-box');
-          pbox.appendChild(el('span', 'progress-box__val', item.progress + '% Complete'));
+          pbox.appendChild(el('span', 'progress-box__val', item.progress + '%'));
           var ptrack = el('div', 'progress-box__track');
           var pfill = el('div', 'progress-box__fill');
           ptrack.appendChild(pfill);
           pbox.appendChild(ptrack);
+          if (item.progressNote) {
+            pbox.appendChild(el('span', 'progress-box__note', item.progressNote));
+          }
           card.style.setProperty('--prog', item.progress / 100);
           metaCol.appendChild(pbox);
+        } else if (item.meta) {
+          metaCol.appendChild(
+            el('span', 'badge-status badge-status--' + (item.meta.state || 'soon'), item.meta.text)
+          );
         } else if (item.date) {
-          var dbox = el('span', 'badge-status badge-status--live', item.date);
-          metaCol.appendChild(dbox);
+          metaCol.appendChild(el('span', 'badge-date', item.date));
         }
         card.appendChild(metaCol);
 
@@ -659,14 +705,101 @@
       archGrid.appendChild(card);
     });
 
-    // Render Cost Table
+    // Render Cost Table. A null amount is a figure we have not confirmed —
+    // it renders as an em dash rather than a zero, because a placeholder
+    // zero reads as a claim that something is free when it may not be.
     ARCHITECTURE.costs.items.forEach(function (c) {
       var row = el('div', 'cost-row');
       row.appendChild(el('span', 'cost-row__label', c.label));
       row.appendChild(el('span', 'cost-row__note', c.note + ' (' + c.period + ')'));
-      row.appendChild(el('span', 'cost-row__amount', ARCHITECTURE.costs.currency + c.amount.toLocaleString('en-IN')));
+      var amountText = (c.amount == null)
+        ? '—'
+        : ARCHITECTURE.costs.currency + c.amount.toLocaleString('en-IN');
+      var amountEl = el('span', 'cost-row__amount', amountText);
+      if (c.amount == null) amountEl.classList.add('is-pending');
+      row.appendChild(amountEl);
       costTable.appendChild(row);
     });
+  }
+
+  /* =========================================================
+     9b — BUILD TIMELINE
+     ========================================================= */
+  function initTimeline() {
+    var list = $('tl-list');
+    if (!list || typeof TIMELINE === 'undefined') return;
+
+    TIMELINE.forEach(function (t, i) {
+      var li = el('li', 'tl__item');
+      li.style.setProperty('--ti', i);
+
+      var dot = el('span', 'tl__dot');
+      dot.setAttribute('aria-hidden', 'true');
+      li.appendChild(dot);
+
+      var body = el('div', 'tl__body');
+      var when = el('time', 'tl__date', t.date);
+      body.appendChild(when);
+      body.appendChild(el('h3', 'tl__title', t.title));
+      body.appendChild(el('p', 'tl__text', t.body));
+
+      var tags = el('div', 'tl__tags');
+      (t.tags || []).forEach(function (tag) {
+        tags.appendChild(el('span', 'idx-tag', tag));
+      });
+      body.appendChild(tags);
+
+      li.appendChild(body);
+      list.appendChild(li);
+    });
+
+    revealOnScroll(list.querySelectorAll('.tl__item'));
+  }
+
+  /* =========================================================
+     9c — STACK MATRIX (WHAT RUNS UNDERNEATH)
+     ========================================================= */
+  function initStackMatrix() {
+    var wrap = $('stack-matrix');
+    if (!wrap || typeof STACK_MATRIX === 'undefined') return;
+
+    var bySlug = {};
+    PROJECTS.forEach(function (p) { bySlug[p.slug] = p; });
+
+    STACK_MATRIX.forEach(function (row, i) {
+      var card = el('div', 'stackm__row');
+      card.style.setProperty('--si', i);
+
+      var head = el('div', 'stackm__head');
+      head.appendChild(el('h3', 'stackm__tech', row.tech));
+      var n = row.projects.length;
+      head.appendChild(el('span', 'stackm__count', n + (n === 1 ? ' project' : ' projects')));
+      card.appendChild(head);
+
+      card.appendChild(el('p', 'stackm__note', row.note));
+
+      var chips = el('div', 'stackm__chips');
+      row.projects.forEach(function (slug) {
+        var p = bySlug[slug];
+        if (!p) return;
+        var chip = el('button', 'stackm__chip');
+        chip.type = 'button';
+        chip.setAttribute('data-cursor', 'Deep Dive');
+        var img = document.createElement('img');
+        img.src = 'assets/logos/' + p.logo;
+        img.alt = '';
+        img.loading = 'lazy';
+        chip.appendChild(img);
+        chip.appendChild(el('span', null, p.name));
+        chip.addEventListener('click', function () { openProjectDetail(p); });
+        chips.appendChild(chip);
+      });
+      card.appendChild(chips);
+
+      wrap.appendChild(card);
+    });
+
+    revealOnScroll(wrap.querySelectorAll('.stackm__row'));
   }
 
   /* =========================================================
@@ -712,9 +845,21 @@
     });
     commands.push({
       type: 'nav',
+      title: 'Jump to Build Timeline',
+      badge: 'Section',
+      action: function () { scrollToSection('timeline'); }
+    });
+    commands.push({
+      type: 'nav',
+      title: 'Jump to Under the Hood',
+      badge: 'Section',
+      action: function () { scrollToSection('stack'); }
+    });
+    commands.push({
+      type: 'nav',
       title: 'Jump to Architecture & Costs',
       badge: 'Section',
-      action: function () { scrollToSection('costs'); }
+      action: function () { scrollToSection('architecture'); }
     });
     THEMES.forEach(function (t) {
       commands.push({
@@ -835,14 +980,52 @@
     $('detail-modal-category').textContent = p.zone + ' • ' + p.year;
     $('detail-modal-blurb').textContent = p.blurb;
 
+    // Status badge + the plain-English note about what does and doesn't work
+    var statusHost = $('detail-modal-status');
+    if (statusHost) {
+      var meta = statusMeta(p.status);
+      statusHost.className = 'badge-status badge-status--' + meta.tone;
+      statusHost.innerHTML =
+        '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" ' +
+        'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        meta.icon + '</svg>';
+      statusHost.appendChild(el('span', null, meta.label));
+    }
+
+    var noteEl = $('detail-modal-statusnote');
+    if (noteEl) {
+      noteEl.textContent = p.statusNote || statusMeta(p.status).desc || '';
+      noteEl.style.display = noteEl.textContent ? 'block' : 'none';
+    }
+
     // Highlights
     var highList = $('detail-modal-highlights');
     highList.innerHTML = '';
     (p.highlights || []).forEach(function (h) {
       var li = el('li');
-      li.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span>' + h + '</span>';
+      li.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
+      li.appendChild(el('span', null, h));
       highList.appendChild(li);
     });
+
+    // What's next — hidden entirely when a project has nothing queued
+    var nextWrap = $('detail-modal-next-wrap');
+    var nextList = $('detail-modal-next');
+    if (nextWrap && nextList) {
+      nextList.innerHTML = '';
+      var nextItems = p.next || [];
+      if (nextItems.length) {
+        nextItems.forEach(function (n) {
+          var li = el('li');
+          li.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+          li.appendChild(el('span', null, n));
+          nextList.appendChild(li);
+        });
+        nextWrap.style.display = 'block';
+      } else {
+        nextWrap.style.display = 'none';
+      }
+    }
 
     // Specs
     var specsWrap = $('detail-modal-specs');
@@ -856,14 +1039,27 @@
       });
     }
 
-    // Launch Link
+    // Launch Link — only shown when there is somewhere real to go
     var launchBtn = $('detail-modal-launch');
     if (p.url) {
       launchBtn.href = p.url;
       launchBtn.style.display = 'inline-flex';
       launchBtn.textContent = 'Launch Live Project ↗';
     } else {
+      launchBtn.removeAttribute('href');
       launchBtn.style.display = 'none';
+    }
+
+    // Source link — set only for repos verified public, so it never 404s
+    var ghBtn = $('detail-modal-github');
+    if (ghBtn) {
+      if (p.github) {
+        ghBtn.href = p.github;
+        ghBtn.style.display = 'inline-flex';
+      } else {
+        ghBtn.removeAttribute('href');
+        ghBtn.style.display = 'none';
+      }
     }
 
     dialog.showModal();
@@ -921,6 +1117,8 @@
   initIndex();
   initSpotlightStage();
   initRoadmap();
+  initTimeline();
+  initStackMatrix();
   initArchitecture();
   initCommandPalette();
   initNavWatcher();

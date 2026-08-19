@@ -43,6 +43,16 @@
   --badge-build-text: #8C5528;
   --badge-build-border: rgba(140, 85, 40, 0.14);
 
+  /* Testing — built and deployed, but not yet open to everyone */
+  --badge-testing-bg: #FDF6E3;
+  --badge-testing-text: #8A6100;
+  --badge-testing-border: rgba(138, 97, 0, 0.16);
+
+  /* Coming soon — in build, nothing deployed */
+  --badge-soon-bg: #F1EFEC;
+  --badge-soon-text: #55504B;
+  --badge-soon-border: rgba(85, 80, 75, 0.14);
+
   --font-display: 'Syne', 'Cabinet Grotesk', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'Satoshi', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
@@ -1616,4 +1626,332 @@ body {
   .w i { transform: none; opacity: 1; }
   [data-reveal] { opacity: 1; transform: none; }
   .cursor, .peek, .curtain { display: none !important; }
+}
+
+/* =========================================================
+   TRI-STATE STATUS SYSTEM · TIMELINE · STACK MATRIX
+   Added 2026-08-19. Additive only — no existing rule is
+   redefined here, and every token above is reused as-is.
+   ========================================================= */
+
+/* ---- Status badges ----------------------------------------------------
+   Each state carries an icon AND a text label, never colour alone.      */
+.badge-status svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+.badge-status--testing {
+  background: var(--badge-testing-bg);
+  color: var(--badge-testing-text);
+  border: 1px solid var(--badge-testing-border);
+}
+.badge-status--soon {
+  background: var(--badge-soon-bg);
+  color: var(--badge-soon-text);
+  border: 1px solid var(--badge-soon-border);
+}
+
+/* A date is not a status — it gets its own neutral treatment. */
+.badge-date {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-card);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-box__note {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-muted);
+  text-align: right;
+  line-height: 1.4;
+}
+
+/* An unconfirmed figure reads as a dash, and is visibly softer than a
+   real number so it cannot be mistaken for one. */
+.cost-row__amount.is-pending {
+  color: var(--text-dim);
+}
+
+.spotlight-card__status {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  box-shadow: var(--shadow-subtle);
+}
+
+/* ---- 04 · Build timeline ---------------------------------------------- */
+.tl {
+  list-style: none;
+  position: relative;
+  margin-top: 8px;
+  padding-left: 4px;
+}
+.tl::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 10px;
+  bottom: 10px;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--border-strong) 8%,
+    var(--border-strong) 92%,
+    transparent
+  );
+}
+.tl__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 20px;
+  padding: 0 0 34px 0;
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.5s var(--ease-out-expo),
+    transform 0.5s var(--ease-out-expo);
+  transition-delay: calc(var(--ti, 0) * 40ms);
+}
+.tl__item.is-in {
+  opacity: 1;
+  transform: none;
+}
+.tl__item:last-child { padding-bottom: 0; }
+
+.tl__dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 2px solid var(--text-primary);
+  margin-top: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.tl__date {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-secondary);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 6px;
+}
+.tl__title {
+  font-family: var(--font-display);
+  font-size: clamp(19px, 2.4vw, 25px);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.tl__text {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  max-width: 68ch;
+}
+.tl__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+/* ---- 05 · Stack matrix ------------------------------------------------ */
+.stackm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 1px;
+  background: var(--border-card);
+  border: 1px solid var(--border-card);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.stackm__row {
+  background: var(--bg-card);
+  padding: 24px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.45s var(--ease-out-expo),
+    transform 0.45s var(--ease-out-expo),
+    background-color 0.3s;
+  transition-delay: calc(var(--si, 0) * 35ms);
+}
+.stackm__row.is-in {
+  opacity: 1;
+  transform: none;
+}
+.stackm__row:hover { background: var(--bg-primary); }
+
+.stackm__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.stackm__tech {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+.stackm__count {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.stackm__note {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  flex: 1;
+}
+.stackm__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+.stackm__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 6px;
+  border-radius: 999px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-card);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.2s var(--ease-smooth),
+    color 0.2s var(--ease-smooth),
+    border-color 0.2s var(--ease-smooth);
+}
+.stackm__chip:hover,
+.stackm__chip:focus-visible {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--bg-primary);
+}
+.stackm__chip img {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+
+/* ---- Deep-dive modal additions ---------------------------------------- */
+.detail-modal__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.detail-modal__cat {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.detail-modal__cta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.detail-modal__statusnote {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border-left: 2px solid var(--accent-secondary);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+}
+.detail-modal__h4 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-top: 24px;
+  color: var(--text-primary);
+}
+.detail-modal__next {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 4px;
+}
+.detail-modal__next li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.detail-modal__next svg {
+  width: 15px;
+  height: 15px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+/* ---- Responsive ------------------------------------------------------- */
+@media (max-width: 720px) {
+  .tl__item {
+    grid-template-columns: 14px 1fr;
+    gap: 14px;
+    padding-bottom: 28px;
+  }
+  .tl::before { left: 6px; }
+  .tl__dot { width: 13px; height: 13px; }
+  .stackm { grid-template-columns: 1fr; }
+  .detail-modal__cta { width: 100%; }
+  .detail-modal__cta > * { flex: 1 1 auto; justify-content: center; }
+}
+
+/* ---- Motion preferences ----------------------------------------------
+   Content must never depend on an animation having run.                 */
+@media (prefers-reduced-motion: reduce) {
+  .tl__item,
+  .stackm__row {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
