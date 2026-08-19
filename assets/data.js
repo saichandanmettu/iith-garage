@@ -19,10 +19,11 @@
    ========================================================= */
 
 var SITE = {
-  title: 'The builds for IIT-H',
+  title: 'IITH Garage',
+  subtitle: 'The builds for IIT-H',
   shortTitle: 'iith.online',
   tagline:
-    'A working library of systems designed, built and shipped for the Indian Institute of Technology Hyderabad.',
+    'The workshop behind every system built for the Indian Institute of Technology Hyderabad.',
   author: 'Chandan Mettu',
   location: 'IIT Hyderabad (17.599° N, 78.125° E)',
   coordinates: '17.599° N, 78.125° E',
@@ -93,10 +94,8 @@ var PROJECTS = [
     ],
     stack: ['Fuzzy Search Engine', 'Vector Indexing', 'Multi-tenant CDN', 'Vanilla JS'],
     specs: {
-      latency: '< 50ms',
-      uptime: '99.98%',
-      payload: '130 KB',
-      hosting: 'Cloudflare / Edge'
+      departments: '13 covered',
+      catalogue: 'Count to follow'
     }
   },
   {
@@ -119,12 +118,10 @@ var PROJECTS = [
       'Direct UPI checkout with digital pickup passes',
       'Inventory management dashboard for club coordinators'
     ],
-    stack: ['E-Commerce PWA', 'UPI Gateway', 'Supabase Postgres', 'Edge CDN'],
+    stack: ['WordPress', 'WooCommerce', 'Dokan multivendor', 'UPI checkout'],
     specs: {
-      latency: '< 65ms',
-      uptime: '99.98%',
-      payload: '150 KB',
-      hosting: 'Edge Cloud'
+      societies: '18+ listed',
+      orders: 'Count to follow'
     }
   },
   {
@@ -246,11 +243,11 @@ var PROJECTS = [
     name: 'IITH Ruchi',
     zone: 'Dining',
     category: 'Dining',
-    url: null,
+    url: 'https://ruchi.iith.online',
     github: 'https://github.com/saichandanmettu/iith-mess',
     status: 'testing',
     statusNote:
-      'The registration front end, counter scanner and admin console are built, and the repository is public. The subdomain is still being provisioned, so it is not yet open to students.',
+      'Live at ruchi.iith.online with registration, the counter scanner and the admin console all working. Marked testing rather than live because a registration cycle has not yet been run with real students.',
     year: '2026',
     started: 'Jul 2026',
     accentColor: '#F59E0B',
@@ -406,8 +403,8 @@ var BOARD = [
         title: 'Ruchi branded, sourced and published',
         date: 'Aug 2026',
         isNew: true,
-        body: 'The mess portal picked up a name, a vision document and a public repository. Subdomain provisioning is in progress.',
-        tags: ['Ruchi', 'Open source']
+        body: 'The mess portal picked up a name, a vision document, a public repository and a subdomain of its own at ruchi.iith.online.',
+        tags: ['ruchi.iith.online', 'Open source']
       },
       {
         title: 'Security review across every live project',

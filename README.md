@@ -1,23 +1,56 @@
-# The builds for IIT-H
+# IITH Garage
 
-*"Digital Ecosystem & Projects Showcase"* — the site that presents everything
-built for IIT Hyderabad in one place.
+*The builds for IIT-H* — the workshop that presents every system designed,
+built and shipped for IIT Hyderabad in one place.
 
-**Status:** in development, next up for real work · **Not deployed** · **Not on GitHub**
+> Naming: "Garage" is the parent brand and sits on the `iith.online` apex.
+> The projects it showcases keep their own names — Sanchari, Nivas, Ruchi —
+> each on its own subdomain underneath.
 
-Plain HTML/CSS/JS. Single copy — no rival versions, unlike most of the others.
+**Status:** in development · **Not deployed** · **Repo:** `saichandanmettu/iith-garage`
 
-## What's already in it
+Plain HTML, CSS and JavaScript. No build step, consistent with everything
+else in the suite.
 
-`assets/logos/` and `assets/previews/` already carry Sanchari's logo and preview
-image, so the showcase structure exists and is partly populated.
+## What it covers
+
+Seven projects, six of them deployed:
+
+| Project | Where | Status |
+|---|---|---|
+| Merch Store | store.iith.online | Live |
+| IITH Athletics | athletics.iith.online | Live |
+| IITH Sanchari | sanchari.iith.online | Live |
+| Nivas | nivas.iith.online | Live |
+| IITH Aquatics | aquatics.iith.online | Live |
+| IITH Ruchi | ruchi.iith.online | Testing |
+| Resource Hub | — | Coming soon |
+
+## Editing it
+
+`assets/data.js` is the single edit point — projects, statuses, roadmap,
+timeline, stack matrix and costs all live there. The ground rules are
+written at the top of that file and are worth reading before adding
+anything:
+
+1. **No usage metrics.** Nothing claims trips taken, orders placed or
+   students reached — none of it is measured. Every figure on the site is a
+   structural fact that can be checked by opening the project.
+2. **No invented performance numbers.** No latency or uptime claims.
+3. **Status is `live` / `testing` / `soon`**, and every project carries a
+   `statusNote` saying plainly what does and does not work.
+4. **`github` is set only for repos verified public** — a link that 404s is
+   worse than no link.
+5. **Never name a payment gateway** in user-facing copy.
+
+Bump `?v=` on `style.css`, `data.js` and `app.js` in `index.html` on every
+change — the CDN caches static assets for 7 days, and skipping this is
+routinely the reason a fix appears not to have shipped.
 
 ## Worth knowing before building it out
 
-This site's whole job is to describe the other projects — so it depends on facts
-that live in their trackers, and it will go stale silently if they change.
-Several of those projects have unresolved items that affect how they should be
-described publicly (what's live, what isn't, what's still placeholder data).
+This site's whole job is to describe the other projects, so it depends on
+facts that live in their trackers and will go stale silently if they change.
 Check each project's `KNOWN_ISSUES.md` before writing copy about it.
 
 Secrets scan clean.
