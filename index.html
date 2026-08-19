@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The builds for IIT-H — Digital Ecosystem & Projects Showcase</title>
+  <meta name="description" content="A working library and digital ecosystem designed and shipped for IIT Hyderabad — athletics records, campus mobility, 3D hostel navigator, pool gatekeeper, dining signups, and course resources.">
+  <meta name="keywords" content="IIT Hyderabad, IITH, projects, digital archive, athletics, sanchari, nivas, campus, engineering">
+  <meta name="author" content="Chandan Mettu">
+  <meta name="theme-color" content="#FAF8F5">
+
+  <!-- Open Graph / Social Meta -->
+  <meta property="og:title" content="The builds for IIT-H — Digital Ecosystem">
+  <meta property="og:description" content="Six flagship digital systems engineered for IIT Hyderabad. Zero-overhead, maximum velocity.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://iith.online">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The builds for IIT-H">
+  <meta name="twitter:description" content="Independent digital systems engineered for IIT Hyderabad.">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231C1917'/%3E%3Cpath d='M8 16L14 22L24 10' stroke='%23FAF8F5' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+
+  <!-- Modern Fonts (Syne, Cabinet Grotesk, Satoshi, Plus Jakarta Sans, JetBrains Mono) -->
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f%5B%5D=cabinet-grotesk@500,700,800,900&f%5B%5D=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/style.css?v=2.1">
+</head>
+<body>
+
+  <!-- Accessible Skip Link -->
+  <a class="skip-link" href="#index">Skip to Projects Index</a>
+
+  <!-- Custom Kinetic Magnetic Cursor -->
+  <div class="cursor" id="cursor" aria-hidden="true">
+    <div class="cursor__dot"></div>
+    <div class="cursor__ring">
+      <span class="cursor__label"></span>
+    </div>
+  </div>
+
+  <!-- Desktop Screenshot Peek Container -->
+  <div class="peek" id="peek" aria-hidden="true">
+    <img id="peek-img" alt="Project preview">
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       FLOATING NAVIGATION BAR
+       ══════════════════════════════════════════════════════════ -->
+  <header class="nav-header" id="nav-header">
+    <div class="wrap nav-header__inner">
+      <a class="brand-mark" href="#top" data-cursor="Top">
+        <div class="brand-mark__symbol">H</div>
+        <span class="brand-mark__title">iith<span>.</span>online</span>
+      </a>
+
+      <nav aria-label="Main Navigation">
+        <ul class="nav-links">
+          <li><a class="nav-link" href="#index" data-cursor="Index">Index</a></li>
+          <li><a class="nav-link" href="#previews" data-cursor="Spotlight">Spotlight</a></li>
+          <li><a class="nav-link" href="#status" data-cursor="Roadmap">Roadmap</a></li>
+          <li><a class="nav-link" href="#architecture" data-cursor="Architecture">Architecture</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ══════════════════════════════════════════════════════════
+         HERO SECTION
+         ══════════════════════════════════════════════════════════ -->
+    <section class="hero">
+      <div class="wrap hero__content">
+        <div class="hero__eyebrow">
+          <span>IIT HYDERABAD</span>
+          <span>•</span>
+          <span>DIGITAL LABS & ARCHIVE 2026</span>
+        </div>
+
+        <h1 class="hero__title">
+          The digital builds for <span class="highlight">IIT Hyderabad.</span>
+        </h1>
+
+        <p class="hero__lede">
+          A working library of systems designed and shipped for this campus.
+        </p>
+
+        <!-- Live Telemetry Metrics HUD -->
+        <div class="hero__metrics">
+          <div class="metric-card">
+            <div class="metric-card__val">07</div>
+            <div class="metric-card__lbl">Campus Systems</div>
+            <div class="metric-card__note">Active digital suites</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card__val">04</div>
+            <div class="metric-card__lbl">Live Deployments</div>
+            <div class="metric-card__note">Production subdomains</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card__val">5,000+</div>
+            <div class="metric-card__lbl">Student Community</div>
+            <div class="metric-card__note">Zero paper latency</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card__val">₹0.00</div>
+            <div class="metric-card__lbl">Server Fleet Cost</div>
+            <div class="metric-card__note">Serverless & static edge</div>
+          </div>
+        </div>
+
+        <div class="hero__actions">
+          <a class="btn-primary" href="#index" data-cursor="Explore">
+            <span>Explore All Projects</span>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+          </a>
+
+          <a class="btn-secondary" href="#previews" data-cursor="Spotlight">
+            <span>Interactive Spotlight</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         01 — THE INDEX (INTERACTIVE PROJECT ARCHIVE)
+         ══════════════════════════════════════════════════════════ -->
+    <section class="sec" id="index">
+      <div class="wrap">
+        <p class="kicker"><span>01</span> The Index</p>
+        <h2 class="sec__title">Everything, in one place.</h2>
+
+        <!-- Interactive Category Filter & Search Bar -->
+        <div class="index-filter-bar">
+          <div class="category-pills" id="category-pills" role="tablist" aria-label="Filter by project category"></div>
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="index-search" placeholder="Search systems, stack, tags..." aria-label="Search projects">
+          </div>
+        </div>
+
+        <!-- Project Table -->
+        <ul class="idx-table" id="idx-table"></ul>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         02 — PREVIEWS (CINEMATIC 3D SPOTLIGHT STAGE)
+         ══════════════════════════════════════════════════════════ -->
+    <section class="sec sec--alt" id="previews">
+      <div class="wrap">
+        <div class="spotlight-controls-top">
+          <div>
+            <p class="kicker"><span>02</span> Spotlight</p>
+            <h2 class="sec__title" style="margin-bottom:0;">Designed, built, and shipped for campus.</h2>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3D Track Stage -->
+      <div class="stage-container" id="stage-container">
+        <div class="stage-track" id="stage-track"></div>
+      </div>
+
+      <div class="wrap stage-foot">
+        <div class="stage-info">
+          <h3 class="stage-info__title" id="stage-title">Loading...</h3>
+          <p class="stage-info__desc" id="stage-desc"></p>
+          <div class="stage-info__links" id="stage-links"></div>
+        </div>
+
+        <div class="stage-nav-controls">
+          <button class="btn-nav-round" id="stage-prev" data-cursor="Previous" aria-label="Previous project slide">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <span class="stage-counter"><b id="stage-counter-current">1</b> / <span id="stage-counter-total">6</span></span>
+          <button class="btn-nav-round" id="stage-next" data-cursor="Next" aria-label="Next project slide">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         03 — MISSION CONTROL (ROADMAP & TELEMETRY)
+         ══════════════════════════════════════════════════════════ -->
+    <section class="sec" id="status">
+      <div class="wrap">
+        <p class="kicker"><span>03</span> Mission Control</p>
+        <h2 class="sec__title">Where it all stands.</h2>
+
+        <div class="status-tabs" id="status-tabs" role="tablist" aria-label="Roadmap stages">
+          <span class="status-tabs__ink" id="status-tabs-ink" aria-hidden="true"></span>
+        </div>
+
+        <div class="roadmap-grid" id="roadmap-grid"></div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         04 — ARCHITECTURE & SUSTAINABILITY (INFRASTRUCTURE & BILL)
+         ══════════════════════════════════════════════════════════ -->
+    <section class="sec sec--alt" id="architecture">
+      <div class="wrap">
+        <p class="kicker"><span>04</span> Architecture & Sustainability</p>
+        <h2 class="sec__title">Zero overhead. Maximum velocity.</h2>
+
+        <!-- 4 Pillar Architecture Grid -->
+        <div class="arch-grid" id="arch-grid"></div>
+
+        <!-- Transparent Operating Expenditure Table -->
+        <div class="cost-table" id="cost-table"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════════
+       FOOTER
+       ══════════════════════════════════════════════════════════ -->
+  <footer class="site-footer">
+    <div class="wrap footer-main">
+      <div class="footer-about">
+        <h3 class="footer-about__name">Chandan Mettu</h3>
+        <p class="footer-about__desc">
+          Independent digital systems crafted for Indian Institute of Technology Hyderabad.
+          Built with raw standards, zero heavy dependencies, and extreme performance.
+        </p>
+      </div>
+
+      <div class="footer-links">
+        <h4 class="footer-links__title">Navigation</h4>
+        <ul class="footer-links__list">
+          <li><a href="#index">Project Index</a></li>
+          <li><a href="#previews">Screen Spotlight</a></li>
+          <li><a href="#status">Mission Control</a></li>
+          <li><a href="#architecture">Architecture Specs</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links">
+        <h4 class="footer-links__title">Coordinates</h4>
+        <ul class="footer-links__list">
+          <li><span style="color:var(--text-muted);">IIT Hyderabad, Kandi</span></li>
+          <li><span style="color:var(--text-muted);">Sangareddy, Telangana 502284</span></li>
+          <li><span style="color:var(--text-muted); font-family:var(--font-mono); font-size:12px;">17.599° N, 78.125° E</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-giant-brand" aria-hidden="true">
+      <span class="giant-watermark">iith.online</span>
+    </div>
+  </footer>
+
+  <!-- ══════════════════════════════════════════════════════════
+       COMMAND PALETTE MODAL (⌘K)
+       ══════════════════════════════════════════════════════════ -->
+  <div class="palette-modal" id="palette-modal" role="dialog" aria-modal="true" aria-label="Command Palette">
+    <div class="palette-box">
+      <div class="palette-input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input class="palette-input" id="palette-input" type="text" placeholder="Type a command or search project..." autocomplete="off">
+      </div>
+      <ul class="palette-results" id="palette-results"></ul>
+      <div class="palette-footer">
+        <span>Use <kbd>↑</kbd> <kbd>↓</kbd> to navigate</span>
+        <span><kbd>Enter</kbd> to select</span>
+        <span><kbd>Esc</kbd> to close</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PROJECT DEEP DIVE MODAL DIALOG
+       ══════════════════════════════════════════════════════════ -->
+  <dialog class="detail-dialog" id="detail-dialog">
+    <div class="detail-modal__banner">
+      <img id="detail-modal-banner-img" alt="Project preview banner">
+      <div class="detail-modal__banner-overlay"></div>
+      <button class="btn-close-modal" id="btn-close-detail" aria-label="Close project modal">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="detail-modal__body">
+      <div class="detail-modal__header">
+        <div>
+          <span class="badge-status badge-status--live" id="detail-modal-category">Category</span>
+          <h2 class="detail-modal__title" id="detail-modal-title">Project Name</h2>
+        </div>
+        <a class="btn-primary" id="detail-modal-launch" href="#" target="_blank" rel="noopener">Launch Deployment ↗</a>
+      </div>
+
+      <p id="detail-modal-blurb" style="font-size:15.5px; color:var(--text-secondary); line-height:1.6;"></p>
+
+      <h4 style="font-family:var(--font-display); font-size:18px; margin-top:24px;">Architectural Highlights</h4>
+      <ul class="detail-modal__highlights" id="detail-modal-highlights"></ul>
+
+      <div class="detail-modal__specs" id="detail-modal-specs"></div>
+    </div>
+  </dialog>
+
+  <!-- Data and Application Scripts -->
+  <script src="assets/data.js?v=2.1"></script>
+  <script src="assets/app.js?v=2.1"></script>
+</body>
+</html>
