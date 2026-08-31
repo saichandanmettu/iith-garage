@@ -42,9 +42,10 @@
 
     var deployed = PROJECTS.filter(function (p) { return !!p.url; }).length;
     var cells = [
-      [pad(PROJECTS.length), 'Systems built'],
+      [pad(PROJECTS.length) + '+', 'Builds & counting'],
       [pad(deployed), 'Deployed'],
-      ['₹2,000', 'A year to run']
+      ['00', 'Build steps'],
+      ['00', 'Trackers']
     ];
     var sc = $('#statcard');
     cells.forEach(function (c) { sc.appendChild(el('div', '', '<b class="tnum">' + c[0] + '</b><span>' + c[1] + '</span>')); });
