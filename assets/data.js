@@ -74,7 +74,7 @@ var CATEGORIES = [
 var PROJECTS = [
   {
     slug: 'resources',
-    logo: 'resources.svg',
+    logo: 'abhyas.png',
     name: 'Abhyas',
     zone: 'Academics',
     category: 'Academics',

@@ -371,7 +371,7 @@
         // Mobile Inline Preview
         var mobShot = el('div', 'idx-row__mobile-shot');
         var mobImg = document.createElement('img');
-        mobImg.src = 'assets/previews/' + p.slug + '.jpg';
+        mobImg.src = 'assets/previews/' + p.slug + '.jpg?v=2.5';
         mobImg.alt = 'Screenshot of ' + p.name;
         mobImg.loading = 'lazy';
         mobShot.appendChild(mobImg);
@@ -385,7 +385,7 @@
           table.classList.add('is-focused');
           li.classList.add('is-active');
           if (peek && peekImg) {
-            peekImg.src = 'assets/previews/' + p.slug + '.jpg';
+            peekImg.src = 'assets/previews/' + p.slug + '.jpg?v=2.5';
             peek.classList.add('is-on');
           }
         });
@@ -455,7 +455,7 @@
 
       var img = document.createElement('img');
       img.className = 'spotlight-card__shot';
-      img.src = 'assets/previews/' + p.slug + '.jpg';
+      img.src = 'assets/previews/' + p.slug + '.jpg?v=2.5';
       img.alt = p.name + ' preview screenshot';
       img.loading = idx === 0 ? 'eager' : 'lazy';
       card.appendChild(img);
@@ -974,7 +974,7 @@
     var dialog = $('detail-dialog');
     if (!dialog) return;
 
-    $('detail-modal-banner-img').src = 'assets/previews/' + p.slug + '.jpg';
+    $('detail-modal-banner-img').src = 'assets/previews/' + p.slug + '.jpg?v=2.5';
     $('detail-modal-banner-img').alt = p.name + ' preview screenshot';
     $('detail-modal-title').textContent = p.name;
     $('detail-modal-category').textContent = p.zone + ' • ' + p.year;
