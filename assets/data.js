@@ -75,27 +75,30 @@ var PROJECTS = [
   {
     slug: 'resources',
     logo: 'resources.svg',
-    name: 'Resource Hub',
+    name: 'Abhyas',
     zone: 'Academics',
     category: 'Academics',
-    url: null,
+    url: 'https://abhyas.iith.online',
     github: null,
-    status: 'building',
+    status: 'live',
+    statusNote:
+      'Live at abhyas.iith.online. Browse, search and the reference shelf work; the contribution flow and the contributor leaderboard are in. The catalogue is still being filled out course by course.',
     year: '2026',
-    accentColor: '#818CF8',
-    metric: { label: 'Departments', value: '13 Integrated' },
+    accentColor: '#F28700',
+    metric: { label: 'Departments', value: '15 mapped' },
     blurb:
-      'The comprehensive academic open library for IIT Hyderabad. Organizes lecture notes, curated past examinations, tutorial solutions, and lab manuals across 13 engineering and sciences departments with instant fuzzy search.',
+      'Course materials for IIT Hyderabad in one place — lecture notes, past exam papers, assignment solutions and the reference books each course leans on, organised by course and by all 15 of the institute’s departments, with instant search.',
     highlights: [
-      'High-speed fuzzy search across course codes (e.g. CS1010, EE2010, MA1110)',
-      'Community peer moderation and contribution upload pipeline',
-      'Integrated PDF reader with bookmarking and dark-mode inverter',
-      'Comprehensive syllabus matching and semester roadmap explorer'
+      'Search by course code, professor or topic (⌘K)',
+      'Four resource kinds — past papers, notes, assignments, reference books — each colour-coded',
+      'In-browser PDF reader (pdf.js) with a dark-mode inverter',
+      'Open contribution flow with a review queue and a contributor leaderboard'
     ],
-    stack: ['Fuzzy Search Engine', 'Vector Indexing', 'Multi-tenant CDN', 'Vanilla JS'],
+    stack: ['Vanilla JS', 'pdf.js', 'PHP API', 'Lenis'],
     specs: {
-      departments: '13 covered',
-      catalogue: 'Count to follow'
+      departments: '15 mapped',
+      'resource kinds': 'Papers, notes, assignments, books',
+      deploy: 'Auto on push'
     }
   },
   {
@@ -399,6 +402,13 @@ var BOARD = [
     sub: 'Production Systems in the Wild',
     icon: 'check',
     items: [
+      {
+        title: 'Abhyas goes live',
+        date: 'Aug 2026',
+        isNew: true,
+        body: 'The course library was rebuilt with an identity of its own and shipped to abhyas.iith.online — past papers, notes, assignment solutions and a reference shelf, grouped by course across 15 departments, with an open contribution flow and a contributor leaderboard.',
+        tags: ['abhyas.iith.online', 'Contribution flow']
+      },
       {
         title: 'Ruchi branded, sourced and published',
         date: 'Aug 2026',

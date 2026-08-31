@@ -7,24 +7,24 @@ built and shipped for IIT Hyderabad in one place.
 > The projects it showcases keep their own names — Sanchari, Nivas, Ruchi —
 > each on its own subdomain underneath.
 
-**Status:** in development · **Not deployed** · **Repo:** `saichandanmettu/iith-garage`
+**Status:** live at `iith.online` · **Repo:** `saichandanmettu/iith-garage`
 
 Plain HTML, CSS and JavaScript. No build step, consistent with everything
 else in the suite.
 
 ## What it covers
 
-Seven projects, six of them deployed:
+Seven projects, all deployed:
 
 | Project | Where | Status |
 |---|---|---|
+| Abhyas | abhyas.iith.online | Live |
 | Merch Store | store.iith.online | Live |
 | IITH Athletics | athletics.iith.online | Live |
 | IITH Sanchari | sanchari.iith.online | Live |
 | Nivas | nivas.iith.online | Live |
 | IITH Aquatics | aquatics.iith.online | Live |
 | IITH Ruchi | ruchi.iith.online | Testing |
-| Resource Hub | — | Coming soon |
 
 ## Editing it
 
