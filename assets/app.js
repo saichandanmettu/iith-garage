@@ -1,1126 +1,241 @@
-/* =========================================================
-   THE BUILDS FOR IIT-H — CORE INTERACTION & KINETIC ENGINE
-   Awwwards-grade interactive physics, particle canvas,
-   magnetic cursor, command palette, 3D spotlight, and theme engine.
-   ========================================================= */
-
+/* ============================================================
+   IITH GARAGE — "THE PROVING GROUND"  (redesign, preview only)
+   Renders from data.js. No libraries, no build step.
+   ============================================================ */
 (function () {
   'use strict';
 
-  var $ = function (id) { return document.getElementById(id); };
+  var $  = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var fine   = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
 
-  function el(tag, cls, text) {
+  function el(tag, cls, html) {
     var n = document.createElement(tag);
     if (cls) n.className = cls;
-    if (text != null) n.textContent = text;
+    if (html != null) n.innerHTML = html;
     return n;
   }
-  function lerp(a, b, t) { return a + (b - a) * t; }
-
-  /* Status vocabulary — colour is never the only carrier of meaning,
-     so every badge ships an icon and a text label alongside the tone. */
-  function statusMeta(key) {
-    return (typeof STATUS !== 'undefined' && STATUS[key]) ? STATUS[key] : {
-      label: 'Coming soon', tone: 'soon', desc: '', icon: '<circle cx="12" cy="12" r="9"/>'
-    };
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+  function pv(slug) { return 'assets/previews/' + slug + '.jpg?v=2.5'; }
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function statusMeta(k) { return (typeof STATUS !== 'undefined' && STATUS[k]) || { label: k, tone: 'soon' }; }
+  function chip(k, dark) {
+    var m = statusMeta(k);
+    return '<span class="chip chip--' + m.tone + '"><i></i>' + esc(m.label) + '</span>';
   }
 
-  function makeStatusBadge(key, extraClass) {
-    var meta = statusMeta(key);
-    var span = el('span', 'badge-status badge-status--' + meta.tone + (extraClass ? ' ' + extraClass : ''));
-    span.innerHTML =
-      '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" ' +
-      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-      meta.icon + '</svg>';
-    span.appendChild(el('span', null, meta.label));
-    span.title = meta.desc;
-    return span;
+  /* ---------- LOADER ------------------------------------ */
+  function loader() {
+    var l = $('#loader');
+    if (!l) return;
+    if (reduce) { l.remove(); return; }
+    window.addEventListener('load', function () {
+      setTimeout(function () { l.classList.add('is-done'); setTimeout(function () { l.remove(); }, 900); }, 620);
+    });
+    setTimeout(function () { if (document.body.contains(l)) { l.classList.add('is-done'); setTimeout(function () { l.remove(); }, 900); } }, 2600);
   }
 
-  /* Shared scroll reveal. Under prefers-reduced-motion everything is
-     simply shown — the content must never depend on the animation. */
-  function revealOnScroll(nodes) {
-    var list = Array.prototype.slice.call(nodes);
-    if (reduce || !('IntersectionObserver' in window)) {
-      list.forEach(function (n) { n.classList.add('is-in'); });
-      return;
-    }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting) {
-          e.target.classList.add('is-in');
-          io.unobserve(e.target);
+  /* ---------- HERO ------------------------------------- */
+  function hero() {
+    $('#hero-lede').textContent = SITE.tagline;
+    $('#hero-cred').textContent = 'Built at ' + SITE.coordinates.replace(/,\s*/, ' ');
+
+    var deployed = PROJECTS.filter(function (p) { return !!p.url; }).length;
+    var cells = [
+      [pad(PROJECTS.length), 'Systems built'],
+      [pad(deployed), 'Deployed'],
+      ['₹2,000', 'A year to run']
+    ];
+    var sc = $('#statcard');
+    cells.forEach(function (c) { sc.appendChild(el('div', '', '<b class="tnum">' + c[0] + '</b><span>' + c[1] + '</span>')); });
+
+    // marquee — every preview, doubled for a seamless loop
+    var mq = $('#marquee');
+    var set = PROJECTS.concat(PROJECTS);
+    set.forEach(function (p) { var i = el('img'); i.src = pv(p.slug); i.alt = ''; i.loading = 'lazy'; mq.appendChild(i); });
+  }
+
+  /* ---------- THE RUNWAY ------------------------------ */
+  function runway() {
+    var host = $('#panels');
+    PROJECTS.forEach(function (p, i) {
+      var pn = el('article', 'panel');
+      pn.id = 'build-' + p.slug;
+      var launch = p.url ? '<a class="btn btn--flame" href="' + esc(p.url) + '" target="_blank" rel="noopener">Launch ↗</a>' : '';
+      var src = p.github ? '<a class="btn btn--ghost" href="' + esc(p.github) + '" target="_blank" rel="noopener">Source ↗</a>' : '';
+      pn.innerHTML =
+        '<div class="panel__ghost" aria-hidden="true">' + pad(i + 1) + '</div>' +
+        '<div class="panel__body reveal">' +
+          '<div class="panel__cat">' + pad(i + 1) + ' / ' + esc(p.zone) + '</div>' +
+          '<h3 class="panel__name">' + esc(p.name) + '</h3>' +
+          '<p class="panel__lede">' + esc(p.blurb) + '</p>' +
+          '<div class="panel__stat"><b class="tnum">' + esc(p.metric.value) + '</b><span>' + esc(p.metric.label) + '</span></div>' +
+          '<div class="panel__chips">' + (p.stack || []).map(function (s) { return '<span>' + esc(s) + '</span>'; }).join('') + '</div>' +
+          '<div class="panel__cta">' + launch + src + '<span style="align-self:center">' + chip(p.status) + '</span></div>' +
+        '</div>' +
+        '<div class="panel__media reveal reveal-wipe">' +
+          '<div class="panel__frame">' +
+            '<div class="panel__bar"><i></i><i></i><i></i><span>' + (p.url ? esc(p.url.replace(/^https?:\/\//, '')) : 'not yet deployed') + '</span></div>' +
+            '<img src="' + pv(p.slug) + '" alt="Screenshot of ' + esc(p.name) + '" loading="' + (i === 0 ? 'eager' : 'lazy') + '">' +
+          '</div>' +
+        '</div>';
+      host.appendChild(pn);
+    });
+  }
+
+  /* ---------- INDEX (compact) ------------------------ */
+  var activeCat = 'all';
+  function indexList() {
+    var fb = $('#filterbar');
+    CATEGORIES.forEach(function (c) {
+      var b = el('button', c.id === 'all' ? 'is-on' : '', esc(c.label));
+      b.addEventListener('click', function () {
+        activeCat = c.id;
+        $$('#filterbar button').forEach(function (x) { x.classList.remove('is-on'); });
+        b.classList.add('is-on');
+        rows();
+      });
+      fb.appendChild(b);
+    });
+    rows();
+  }
+  function rows() {
+    var list = $('#ilist'); list.innerHTML = '';
+    PROJECTS.filter(function (p) { return activeCat === 'all' || p.category === activeCat; })
+      .forEach(function (p, i) {
+        var a = el('a', 'irow reveal');
+        a.href = '#build-' + p.slug;
+        a.style.transitionDelay = (i * 40) + 'ms';
+        a.innerHTML =
+          '<span class="irow__n tnum">' + pad(i + 1) + '</span>' +
+          '<span class="irow__main"><span class="irow__name">' + esc(p.name) + '</span>' +
+            '<span class="irow__blurb">' + esc(p.blurb) + '</span></span>' +
+          '<span class="irow__chip">' + chip(p.status) + '</span>' +
+          '<span class="irow__arrow"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M9 7h8v8"/></svg></span>';
+        list.appendChild(a);
+      });
+    observe(list);
+  }
+
+  /* ---------- ROADMAP ------------------------------ */
+  function roadmap() {
+    var grid = $('#board');
+    BOARD.forEach(function (col) {
+      var w = el('div', 'reveal');
+      w.innerHTML = '<div class="col__head"><h3>' + esc(col.title) + '</h3><span>' + col.items.length + '</span></div>';
+      col.items.forEach(function (it) {
+        var h = '<div class="bcard__top"><h4>' + esc(it.title) + (it.isNew ? '<span class="bcard__new">NEW</span>' : '') + '</h4>' +
+          (it.date ? '<span class="bcard__date">' + esc(it.date) + '</span>' : '') + '</div>' +
+          '<p class="bcard__body">' + esc(it.body) + '</p>';
+        if (typeof it.progress === 'number') {
+          h += '<div class="pbar"><i style="width:' + it.progress + '%"></i></div><div class="pnote">' + esc(it.progressNote || (it.progress + '%')) + '</div>';
+        } else if (it.meta) {
+          h += '<div class="bmeta">' + esc(it.meta.text) + '</div>';
         }
+        if (it.tags) h += '<div class="bcard__tags">' + it.tags.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>';
+        w.appendChild(el('div', 'bcard', h));
       });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-    list.forEach(function (n) { io.observe(n); });
-  }
-
-  /* =========================================================
-     1 — AMBIENT WEB AUDIO SYNTHESIS (MICRO-HAPTICS)
-     Subtle acoustic clicks on interaction (ultra quiet, opt-in)
-     ========================================================= */
-  var audioCtx = null;
-  var soundEnabled = false;
-
-  function initAudio() {
-    var btn = $('sound-toggle');
-    if (!btn) return;
-
-    btn.addEventListener('click', function () {
-      soundEnabled = !soundEnabled;
-      btn.setAttribute('aria-pressed', String(soundEnabled));
-      btn.classList.toggle('is-active', soundEnabled);
-      if (soundEnabled && !audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      playBlip(soundEnabled ? 640 : 320, 0.05);
+      grid.appendChild(w);
     });
   }
 
-  function playBlip(freq, duration) {
-    if (!soundEnabled || !audioCtx) return;
-    try {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      var osc = audioCtx.createOscillator();
-      var gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq || 520, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.018, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (duration || 0.04));
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + (duration || 0.04));
-    } catch (e) {}
-  }
-
-  /* =========================================================
-     2 — MAGNETIC CURSOR WITH CONTEXTUAL TEXT
-     ========================================================= */
-  function initCursor() {
-    if (!fine || reduce) return;
-
-    var cur = $('cursor');
-    if (!cur) return;
-
-    var dot = cur.querySelector('.cursor__dot');
-    var ring = cur.querySelector('.cursor__ring');
-    var lbl = cur.querySelector('.cursor__label');
-
-    var mx = innerWidth / 2, my = innerHeight / 2;
-    var rx = mx, ry = my;
-
-    addEventListener('mousemove', function (e) {
-      mx = e.clientX;
-      my = e.clientY;
-      cur.classList.add('is-active');
-    }, { passive: true });
-
-    addEventListener('mouseleave', function () {
-      cur.classList.remove('is-active');
-    });
-
-    (function frame() {
-      rx = lerp(rx, mx, 0.16);
-      ry = lerp(ry, my, 0.16);
-      dot.style.transform  = 'translate(' + mx + 'px,' + my + 'px) translate(-50%,-50%)';
-      ring.style.transform = 'translate(' + rx + 'px,' + ry + 'px) translate(-50%,-50%)';
-      requestAnimationFrame(frame);
-    })();
-
-    document.addEventListener('mouseover', function (e) {
-      var target = e.target.closest('a, button, [data-cursor], .idx-row');
-      if (target) {
-        cur.classList.add('is-hovering');
-        var customLabel = target.getAttribute('data-cursor');
-        if (customLabel) {
-          lbl.textContent = customLabel;
-        } else if (target.closest('.idx-row')) {
-          lbl.textContent = 'Explore';
-        } else if (target.tagName === 'A' && target.target === '_blank') {
-          lbl.textContent = 'Visit ↗';
-        } else {
-          lbl.textContent = 'Select';
-        }
-        playBlip(720, 0.02);
-      }
-    });
-
-    document.addEventListener('mouseout', function (e) {
-      if (e.target.closest('a, button, [data-cursor], .idx-row')) {
-        cur.classList.remove('is-hovering');
-      }
+  /* ---------- TIMELINE ---------------------------- */
+  function timeline() {
+    var ol = $('#tl');
+    TIMELINE.forEach(function (t) {
+      var isNew = /aug 2026|19 aug/i.test(t.date) && /consolidation|named/i.test(t.title);
+      var li = el('li', 'reveal' + (isNew ? ' is-new' : ''));
+      li.innerHTML = '<div class="tl__date">' + esc(t.date) + '</div><div class="tl__title">' + esc(t.title) + '</div><div class="tl__body">' + esc(t.body) + '</div>';
+      ol.appendChild(li);
     });
   }
 
-  /* =========================================================
-     5 — ATMOSPHERIC THEME ENGINE WITH VELVET CURTAIN
-     ========================================================= */
-  var THEMES = [
-    { id: 'travertine', c: '#8C6D53', label: 'Travertine Linen' },
-    { id: 'sand',       c: '#9A6A42', label: 'Sandstone' },
-    { id: 'chalk',      c: '#71717A', label: 'Warm Alabaster' },
-    { id: 'zinc',       c: '#18181B', label: 'Minimal Zinc' }
-  ];
-  var SLATS = 9;
-  var busy = false;
-
-  function initThemes() {
-    var wrap = $('theme-swatches');
-    var curtain = $('curtain');
-    if (!wrap || !curtain) return;
-
-    for (var i = 0; i < SLATS; i++) curtain.appendChild(el('span'));
-    var slats = Array.prototype.slice.call(curtain.children);
-
-    THEMES.forEach(function (t) {
-      var b = el('button', 'theme-btn');
-      b.type = 'button';
-      b.style.setProperty('--btn-c', t.c);
-      b.setAttribute('aria-label', t.label + ' Theme');
-      b.setAttribute('data-cursor', t.label);
-      if (t.id === 'travertine') b.classList.add('is-active');
-      b.addEventListener('click', function () { swapTheme(t, b); });
-      wrap.appendChild(b);
-    });
-
-    function swapTheme(t, btn) {
-      if (busy) return;
-      playBlip(580, 0.05);
-
-      if (reduce) {
-        applyTheme(t);
-        markActive(btn);
-        return;
-      }
-
-      busy = true;
-      curtain.classList.add('is-busy');
-      curtain.style.setProperty('--fall', t.c);
-      markActive(btn);
-
-      var FALL = 380, HOLD = 60, LIFT = 360, STEP = 24;
-
-      slats.forEach(function (s, i) {
-        s.style.transformOrigin = 'top';
-        s.animate(
-          [{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }],
-          { duration: FALL, delay: i * STEP, easing: 'cubic-bezier(.5,0,.2,1)', fill: 'forwards' }
-        );
-      });
-
-      var covered = FALL + (SLATS - 1) * STEP;
-
-      setTimeout(function () {
-        applyTheme(t);
-      }, covered + 10);
-
-      setTimeout(function () {
-        slats.forEach(function (s, i) {
-          s.style.transformOrigin = 'bottom';
-          s.animate(
-            [{ transform: 'scaleY(1)' }, { transform: 'scaleY(0)' }],
-            { duration: LIFT, delay: i * STEP, easing: 'cubic-bezier(.6,0,.3,1)', fill: 'forwards' }
-          );
-        });
-
-        setTimeout(function () {
-          slats.forEach(function (s) { s.style.transformOrigin = 'top'; });
-          curtain.classList.remove('is-busy');
-          busy = false;
-        }, LIFT + (SLATS - 1) * STEP + 40);
-      }, covered + HOLD);
-    }
-
-    function applyTheme(t) {
-      if (t.id === 'travertine') document.documentElement.removeAttribute('data-theme');
-      else document.documentElement.setAttribute('data-theme', t.id);
-    }
-
-    function markActive(btn) {
-      wrap.querySelectorAll('.theme-btn').forEach(function (b) {
-        b.classList.toggle('is-active', b === btn);
-      });
-    }
-
-    window.switchThemeById = function (themeId) {
-      var target = THEMES.find(function (t) { return t.id === themeId; });
-      if (target) {
-        var btn = Array.prototype.slice.call(wrap.children).find(function (b, idx) {
-          return THEMES[idx].id === themeId;
-        });
-        swapTheme(target, btn);
-      }
-    };
-  }
-
-  /* =========================================================
-     6 — PROJECT INDEX TABLE (FILTERING, SEARCH & HOVER PEEK)
-     ========================================================= */
-  var activeCategory = 'all';
-  var searchQuery = '';
-
-  function initIndex() {
-    var table = $('idx-table');
-    var catWrap = $('category-pills');
-    var searchInput = $('index-search');
-    var peek = $('peek');
-    var peekImg = $('peek-img');
-    if (!table) return;
-
-    // Render Category Pills
-    CATEGORIES.forEach(function (cat) {
-      var pill = el('button', 'cat-pill' + (cat.id === 'all' ? ' is-active' : ''));
-      pill.textContent = cat.label;
-      pill.setAttribute('data-cursor', cat.label);
-      pill.addEventListener('click', function () {
-        catWrap.querySelectorAll('.cat-pill').forEach(function (p) { p.classList.remove('is-active'); });
-        pill.classList.add('is-active');
-        activeCategory = cat.id;
-        renderIndexRows();
-        playBlip(540, 0.03);
-      });
-      catWrap.appendChild(pill);
-    });
-
-    if (searchInput) {
-      searchInput.addEventListener('input', function (e) {
-        searchQuery = e.target.value.toLowerCase().trim();
-        renderIndexRows();
-      });
-    }
-
-    function renderIndexRows() {
-      table.innerHTML = '';
-
-      var filtered = PROJECTS.filter(function (p) {
-        var matchCat = (activeCategory === 'all' || p.category === activeCategory);
-        var matchSearch = !searchQuery ||
-          p.name.toLowerCase().includes(searchQuery) ||
-          p.blurb.toLowerCase().includes(searchQuery) ||
-          p.zone.toLowerCase().includes(searchQuery) ||
-          p.stack.some(function (st) { return st.toLowerCase().includes(searchQuery); });
-        return matchCat && matchSearch;
-      });
-
-      if (filtered.length === 0) {
-        var emptyLi = el('li', 'idx-row');
-        var emptyDiv = el('div', 'idx-row__inner');
-        emptyDiv.style.justifyContent = 'center';
-        emptyDiv.appendChild(el('p', null, 'No projects matching filter criteria.'));
-        emptyLi.appendChild(emptyDiv);
-        table.appendChild(emptyLi);
-        return;
-      }
-
-      filtered.forEach(function (p, i) {
-        var li = el('li', 'idx-row');
-        li.setAttribute('data-slug', p.slug);
-
-        var inner = el('div', 'idx-row__inner');
-
-        // Row Index Number
-        inner.appendChild(el('span', 'idx-row__num', String(i + 1).padStart(2, '0')));
-
-        // Logo / Emblem Container
-        var logoBox = el('div', 'idx-row__logo');
-        var logoImg = document.createElement('img');
-        logoImg.src = 'assets/logos/' + p.logo;
-        logoImg.alt = p.name + ' emblem';
-        logoBox.appendChild(logoImg);
-        inner.appendChild(logoBox);
-
-        // Project Info (Name & Blurb)
-        var info = el('div', 'idx-row__info');
-        var name = el('h3', 'idx-row__name', p.name);
-        var blurb = el('p', 'idx-row__blurb', p.blurb);
-        info.appendChild(name);
-        info.appendChild(blurb);
-        inner.appendChild(info);
-
-        // Live Key Metric
-        if (p.metric) {
-          var metricBox = el('div', 'idx-row__metric');
-          metricBox.appendChild(el('span', 'idx-row__metric-val', p.metric.value));
-          metricBox.appendChild(el('span', 'idx-row__metric-lbl', p.metric.label));
-          inner.appendChild(metricBox);
-        }
-
-        // Tech Stack Tags
-        var tagsBox = el('div', 'idx-row__tags');
-        p.stack.slice(0, 2).forEach(function (tag) {
-          tagsBox.appendChild(el('span', 'idx-tag', tag));
-        });
-        inner.appendChild(tagsBox);
-
-        // Action & Status
-        var actBox = el('div', 'idx-row__actions');
-        actBox.appendChild(makeStatusBadge(p.status));
-
-        var openBtn = el('button', 'btn-open-detail');
-        openBtn.setAttribute('aria-label', 'Open deep dive for ' + p.name);
-        openBtn.setAttribute('data-cursor', 'Deep Dive');
-        openBtn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>';
-        actBox.appendChild(openBtn);
-
-        inner.appendChild(actBox);
-
-        // Mobile Inline Preview
-        var mobShot = el('div', 'idx-row__mobile-shot');
-        var mobImg = document.createElement('img');
-        mobImg.src = 'assets/previews/' + p.slug + '.jpg?v=2.5';
-        mobImg.alt = 'Screenshot of ' + p.name;
-        mobImg.loading = 'lazy';
-        mobShot.appendChild(mobImg);
-        inner.appendChild(mobShot);
-
-        li.appendChild(inner);
-        table.appendChild(li);
-
-        // Hover & Focus Interactions
-        inner.addEventListener('mouseenter', function () {
-          table.classList.add('is-focused');
-          li.classList.add('is-active');
-          if (peek && peekImg) {
-            peekImg.src = 'assets/previews/' + p.slug + '.jpg?v=2.5';
-            peek.classList.add('is-on');
-          }
-        });
-
-        inner.addEventListener('mouseleave', function () {
-          table.classList.remove('is-focused');
-          li.classList.remove('is-active');
-          if (peek) peek.classList.remove('is-on');
-        });
-
-        // Click to Open Deep Dive Modal
-        inner.addEventListener('click', function () {
-          openProjectDetail(p);
-        });
-      });
-    }
-
-    renderIndexRows();
-
-    // Mouse Tracking for Desktop Peek
-    if (fine && !reduce && peek) {
-      var px = 0, py = 0, tx = 0, ty = 0, isRunning = false;
-      table.addEventListener('pointermove', function (e) {
-        tx = e.clientX;
-        ty = e.clientY;
-        if (!isRunning) { isRunning = true; peekFrame(); }
-      }, { passive: true });
-
-      function peekFrame() {
-        px = lerp(px, tx, 0.14);
-        py = lerp(py, ty, 0.14);
-        peek.style.left = px + 'px';
-        peek.style.top  = py + 'px';
-        if (Math.abs(px - tx) > 0.5 || Math.abs(py - ty) > 0.5) {
-          requestAnimationFrame(peekFrame);
-        } else {
-          isRunning = false;
-        }
-      }
-    }
-  }
-
-  /* =========================================================
-     7 — CINEMATIC 3D SPOTLIGHT STAGE
-     ========================================================= */
-  var activeSlide = 0;
-
-  function initSpotlightStage() {
-    var stage = $('stage-container');
-    var track = $('stage-track');
-    var counterEl = $('stage-counter-current');
-    var totalEl = $('stage-counter-total');
-    var descEl = $('stage-desc');
-    var titleEl = $('stage-title');
-    var linkWrap = $('stage-links');
-    var prevBtn = $('stage-prev');
-    var nextBtn = $('stage-next');
-    if (!stage || !track) return;
-
-    totalEl.textContent = PROJECTS.length;
-
-    // Build spotlight cards
-    PROJECTS.forEach(function (p, idx) {
-      var card = el('div', 'spotlight-card' + (idx === 0 ? ' is-active' : ''));
-      card.setAttribute('data-index', idx);
-      card.setAttribute('data-cursor', 'Zoom');
-
-      var img = document.createElement('img');
-      img.className = 'spotlight-card__shot';
-      img.src = 'assets/previews/' + p.slug + '.jpg?v=2.5';
-      img.alt = p.name + ' preview screenshot';
-      img.loading = idx === 0 ? 'eager' : 'lazy';
-      card.appendChild(img);
-
-      var overlay = el('div', 'spotlight-card__overlay');
-      card.appendChild(overlay);
-
-      var badge = el('div', 'spotlight-card__badge', p.zone + ' • ' + p.year);
-      card.appendChild(badge);
-
-      card.appendChild(makeStatusBadge(p.status, 'spotlight-card__status'));
-
-      card.addEventListener('click', function () {
-        if (idx === activeSlide) {
-          openProjectDetail(p);
-        } else {
-          goToSlide(idx);
-        }
-      });
-
-      track.appendChild(card);
-    });
-
-    function getCardMetrics() {
-      var first = track.children[0];
-      if (!first) return { cardWidth: 0, gap: 0, step: 0 };
-      var cardWidth = first.getBoundingClientRect().width;
-      var gap = parseFloat(getComputedStyle(track).gap) || 28;
-      return { cardWidth: cardWidth, gap: gap, step: cardWidth + gap };
-    }
-
-    function calculateCenterOffset(slideIndex) {
-      var metrics = getCardMetrics();
-      var stageWidth = stage.getBoundingClientRect().width;
-      return (stageWidth / 2) - (slideIndex * metrics.step) - (metrics.cardWidth / 2);
-    }
-
-    function updateStageUI() {
-      var p = PROJECTS[activeSlide];
-      if (counterEl) counterEl.textContent = activeSlide + 1;
-
-      var offset = calculateCenterOffset(activeSlide);
-      track.style.transform = 'translate3d(' + offset + 'px, 0, 0)';
-
-      Array.prototype.forEach.call(track.children, function (card, i) {
-        card.classList.toggle('is-active', i === activeSlide);
-      });
-
-      if (titleEl) titleEl.textContent = p.name;
-      if (descEl) descEl.textContent = p.statusNote || p.blurb;
-
-      if (linkWrap) {
-        linkWrap.innerHTML = '';
-        if (p.url) {
-          var visitA = el('a', 'btn-primary', 'Launch Deployment ↗');
-          visitA.href = p.url;
-          visitA.target = '_blank';
-          visitA.rel = 'noopener';
-          visitA.setAttribute('data-cursor', 'Launch');
-          linkWrap.appendChild(visitA);
-        }
-        var deepBtn = el('button', 'btn-secondary', 'Technical Specs');
-        deepBtn.type = 'button';
-        deepBtn.setAttribute('data-cursor', 'Inspect');
-        deepBtn.addEventListener('click', function () { openProjectDetail(p); });
-        linkWrap.appendChild(deepBtn);
-      }
-    }
-
-    function goToSlide(n) {
-      activeSlide = Math.max(0, Math.min(PROJECTS.length - 1, n));
-      track.style.transition = 'transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)';
-      updateStageUI();
-      playBlip(600 + activeSlide * 30, 0.03);
-    }
-
-    if (prevBtn) prevBtn.addEventListener('click', function () { goToSlide(activeSlide - 1); });
-    if (nextBtn) nextBtn.addEventListener('click', function () { goToSlide(activeSlide + 1); });
-
-    // Drag / Swipe Gestures
-    var isDragging = false, startX = 0, currentMoved = 0, baseTransform = 0;
-
-    stage.addEventListener('pointerdown', function (e) {
-      isDragging = true;
-      startX = e.clientX;
-      currentMoved = 0;
-      baseTransform = calculateCenterOffset(activeSlide);
-      track.style.transition = 'none';
-    });
-
-    addEventListener('pointermove', function (e) {
-      if (!isDragging) return;
-      currentMoved = e.clientX - startX;
-      track.style.transform = 'translate3d(' + (baseTransform + currentMoved) + 'px, 0, 0)';
-    }, { passive: true });
-
-    function endDrag() {
-      if (!isDragging) return;
-      isDragging = false;
-      track.style.transition = 'transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)';
-      var metrics = getCardMetrics();
-      var threshold = metrics.step * 0.16;
-      if (Math.abs(currentMoved) > threshold) {
-        goToSlide(activeSlide + (currentMoved < 0 ? 1 : -1));
-      } else {
-        updateStageUI();
-      }
-    }
-
-    addEventListener('pointerup', endDrag);
-    addEventListener('pointercancel', endDrag);
-
-    window.addEventListener('resize', function () {
-      track.style.transition = 'none';
-      updateStageUI();
-    });
-
-    // Initial render
-    requestAnimationFrame(function () {
-      updateStageUI();
+  /* ---------- STACK ------------------------------ */
+  function stack() {
+    var box = $('#stackm');
+    STACK_MATRIX.forEach(function (s) {
+      box.appendChild(el('div', 'srow reveal',
+        '<div class="srow__tech">' + esc(s.tech) + '</div>' +
+        '<div class="srow__note">' + esc(s.note) + '</div>' +
+        '<div class="srow__proj">' + s.projects.map(function (p) { return '<span>' + esc(p) + '</span>'; }).join('') + '</div>'));
     });
   }
 
-  /* =========================================================
-     8 — MISSION CONTROL ROADMAP & TELEMETRY TABS
-     ========================================================= */
-  function initRoadmap() {
-    var tabsWrap = $('status-tabs');
-    var ink = $('status-tabs-ink');
-    var grid = $('roadmap-grid');
-    if (!tabsWrap || !grid) return;
-
-    var currentTab = 1; // Default to 'Building Now'
-
-    BOARD.forEach(function (section, idx) {
-      var btn = el('button', 'status-tab-btn' + (idx === currentTab ? ' is-active' : ''));
-      btn.textContent = section.title + ' (' + section.items.length + ')';
-      btn.setAttribute('data-cursor', section.title);
-      btn.addEventListener('click', function () {
-        selectTab(idx);
-      });
-      tabsWrap.appendChild(btn);
+  /* ---------- ARCHITECTURE ----------------------- */
+  var ICONS = {
+    zap: '<path d="M13 2 3 14h7l-1 8 10-12h-7z"/>',
+    shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+    cpu: '<rect x="6" y="6" width="12" height="12" rx="1"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/>',
+    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'
+  };
+  function architecture() {
+    var A = ARCHITECTURE;
+    $('#arch-subline').textContent = A.subline;
+    var pg = $('#pillars');
+    A.pillars.forEach(function (p) {
+      pg.appendChild(el('div', 'pillar reveal',
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[p.icon] || ICONS.zap) + '</svg>' +
+        '<h4>' + esc(p.title) + '</h4><p>' + esc(p.desc) + '</p>'));
     });
-
-    function updateInk() {
-      var activeBtn = tabsWrap.querySelectorAll('.status-tab-btn')[currentTab];
-      if (!activeBtn || !ink) return;
-      ink.style.width = activeBtn.offsetWidth + 'px';
-      ink.style.transform = 'translateX(' + activeBtn.offsetLeft + 'px)';
-    }
-
-    function selectTab(idx) {
-      currentTab = idx;
-      tabsWrap.querySelectorAll('.status-tab-btn').forEach(function (b, i) {
-        b.classList.toggle('is-active', i === idx);
-      });
-      updateInk();
-      renderItems();
-      playBlip(560, 0.03);
-    }
-
-    function renderItems() {
-      grid.innerHTML = '';
-      var data = BOARD[currentTab];
-
-      data.items.forEach(function (item, i) {
-        var card = el('article', 'roadmap-item');
-        card.style.setProperty('--ri', i);
-
-        var infoCol = el('div');
-        var title = el('h4', 'roadmap-item__title');
-        title.appendChild(document.createTextNode(item.title));
-        if (item.isNew) {
-          var newBadge = el('span', 'badge-new', 'NEW');
-          title.appendChild(newBadge);
-        }
-        infoCol.appendChild(title);
-
-        var body = el('p', 'roadmap-item__body', item.body);
-        infoCol.appendChild(body);
-
-        var tags = el('div', 'roadmap-item__tags');
-        (item.tags || []).forEach(function (t) {
-          tags.appendChild(el('span', 'idx-tag', t));
-        });
-        infoCol.appendChild(tags);
-
-        card.appendChild(infoCol);
-
-        // Progress Metric or Date
-        var metaCol = el('div');
-        if (typeof item.progress === 'number') {
-          var pbox = el('div', 'progress-box');
-          pbox.appendChild(el('span', 'progress-box__val', item.progress + '%'));
-          var ptrack = el('div', 'progress-box__track');
-          var pfill = el('div', 'progress-box__fill');
-          ptrack.appendChild(pfill);
-          pbox.appendChild(ptrack);
-          if (item.progressNote) {
-            pbox.appendChild(el('span', 'progress-box__note', item.progressNote));
-          }
-          card.style.setProperty('--prog', item.progress / 100);
-          metaCol.appendChild(pbox);
-        } else if (item.meta) {
-          metaCol.appendChild(
-            el('span', 'badge-status badge-status--' + (item.meta.state || 'soon'), item.meta.text)
-          );
-        } else if (item.date) {
-          metaCol.appendChild(el('span', 'badge-date', item.date));
-        }
-        card.appendChild(metaCol);
-
-        grid.appendChild(card);
-
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () {
-            card.classList.add('is-in');
-          });
-        });
-      });
-    }
-
-    selectTab(1);
-    window.addEventListener('resize', updateInk);
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(updateInk);
-    }
+    var c = A.costs, box = $('#costs');
+    c.items.forEach(function (it) {
+      var amt = it.amount == null ? '&mdash;' : (it.amount === 0 ? 'Free' : c.currency + it.amount.toLocaleString('en-IN'));
+      box.appendChild(el('div', 'costrow',
+        '<div class="costrow__label">' + esc(it.label) + '</div>' +
+        '<div class="costrow__amt tnum">' + amt + ' <small>' + esc(it.period) + '</small></div>' +
+        '<div class="costrow__note">' + esc(it.note) + '</div>'));
+    });
+    box.appendChild(el('div', 'costs__foot', esc(c.totalNote)));
   }
 
-  /* =========================================================
-     9 — ARCHITECTURE & SUSTAINABILITY SECTION
-     ========================================================= */
-  function initArchitecture() {
-    var archGrid = $('arch-grid');
-    var costTable = $('cost-table');
-    if (!archGrid || !costTable) return;
+  /* ---------- REVEALS + NAV ---------------------- */
+  var io;
+  function observe(root) {
+    var nodes = $$('.reveal:not(.is-in)', root || document);
+    if (reduce || !('IntersectionObserver' in window)) { nodes.forEach(function (n) { n.classList.add('is-in'); }); return; }
+    if (!io) io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: .12 });
+    nodes.forEach(function (n) { io.observe(n); });
+  }
+  // failsafe: never leave content invisible if the observer misfires
+  function forceReveal() { $$('.reveal:not(.is-in)').forEach(function (n) { n.classList.add('is-in'); }); }
+  setTimeout(forceReveal, 1400);
+  window.addEventListener('load', function () { setTimeout(forceReveal, 300); });
 
-    // Render 4 Pillars
-    ARCHITECTURE.pillars.forEach(function (p) {
-      var card = el('div', 'arch-card');
-      var icon = el('div', 'arch-card__icon');
-      icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
-      card.appendChild(icon);
+  function navWatch() {
+    var nav = $('#nav');
+    var linkEls = $$('.nav__links a');
+    var targets = linkEls.map(function (a) { return document.querySelector(a.getAttribute('href')); });
 
-      card.appendChild(el('h4', 'arch-card__title', p.title));
-      card.appendChild(el('p', 'arch-card__desc', p.desc));
-      archGrid.appendChild(card);
-    });
-
-    // Render Cost Table. A null amount is a figure we have not confirmed —
-    // it renders as an em dash rather than a zero, because a placeholder
-    // zero reads as a claim that something is free when it may not be.
-    ARCHITECTURE.costs.items.forEach(function (c) {
-      var row = el('div', 'cost-row');
-      row.appendChild(el('span', 'cost-row__label', c.label));
-      row.appendChild(el('span', 'cost-row__note', c.note + ' (' + c.period + ')'));
-      var amountText = (c.amount == null)
-        ? '—'
-        : ARCHITECTURE.costs.currency + c.amount.toLocaleString('en-IN');
-      var amountEl = el('span', 'cost-row__amount', amountText);
-      if (c.amount == null) amountEl.classList.add('is-pending');
-      row.appendChild(amountEl);
-      costTable.appendChild(row);
-    });
+    // colour flip: which [data-nav] section sits under the nav line
+    var zones = $$('[data-nav]');
+    function flip() {
+      nav.classList.toggle('is-stuck', window.scrollY > 12);
+      var line = 40, cur = 'light';
+      zones.forEach(function (z) {
+        var r = z.getBoundingClientRect();
+        if (r.top <= line && r.bottom > line) cur = z.getAttribute('data-nav');
+      });
+      nav.classList.toggle('on-dark', cur === 'dark');
+      var y = window.scrollY + 80, idx = -1;
+      targets.forEach(function (t, i) { if (t && t.offsetTop <= y) idx = i; });
+      linkEls.forEach(function (a, i) { a.classList.toggle('is-active', i === idx); });
+    }
+    window.addEventListener('scroll', flip, { passive: true });
+    window.addEventListener('resize', flip);
+    flip();
   }
 
-  /* =========================================================
-     9b — BUILD TIMELINE
-     ========================================================= */
-  function initTimeline() {
-    var list = $('tl-list');
-    if (!list || typeof TIMELINE === 'undefined') return;
-
-    TIMELINE.forEach(function (t, i) {
-      var li = el('li', 'tl__item');
-      li.style.setProperty('--ti', i);
-
-      var dot = el('span', 'tl__dot');
-      dot.setAttribute('aria-hidden', 'true');
-      li.appendChild(dot);
-
-      var body = el('div', 'tl__body');
-      var when = el('time', 'tl__date', t.date);
-      body.appendChild(when);
-      body.appendChild(el('h3', 'tl__title', t.title));
-      body.appendChild(el('p', 'tl__text', t.body));
-
-      var tags = el('div', 'tl__tags');
-      (t.tags || []).forEach(function (tag) {
-        tags.appendChild(el('span', 'idx-tag', tag));
-      });
-      body.appendChild(tags);
-
-      li.appendChild(body);
-      list.appendChild(li);
-    });
-
-    revealOnScroll(list.querySelectorAll('.tl__item'));
-  }
-
-  /* =========================================================
-     9c — STACK MATRIX (WHAT RUNS UNDERNEATH)
-     ========================================================= */
-  function initStackMatrix() {
-    var wrap = $('stack-matrix');
-    if (!wrap || typeof STACK_MATRIX === 'undefined') return;
-
-    var bySlug = {};
-    PROJECTS.forEach(function (p) { bySlug[p.slug] = p; });
-
-    STACK_MATRIX.forEach(function (row, i) {
-      var card = el('div', 'stackm__row');
-      card.style.setProperty('--si', i);
-
-      var head = el('div', 'stackm__head');
-      head.appendChild(el('h3', 'stackm__tech', row.tech));
-      var n = row.projects.length;
-      head.appendChild(el('span', 'stackm__count', n + (n === 1 ? ' project' : ' projects')));
-      card.appendChild(head);
-
-      card.appendChild(el('p', 'stackm__note', row.note));
-
-      var chips = el('div', 'stackm__chips');
-      row.projects.forEach(function (slug) {
-        var p = bySlug[slug];
-        if (!p) return;
-        var chip = el('button', 'stackm__chip');
-        chip.type = 'button';
-        chip.setAttribute('data-cursor', 'Deep Dive');
-        var img = document.createElement('img');
-        img.src = 'assets/logos/' + p.logo;
-        img.alt = '';
-        img.loading = 'lazy';
-        chip.appendChild(img);
-        chip.appendChild(el('span', null, p.name));
-        chip.addEventListener('click', function () { openProjectDetail(p); });
-        chips.appendChild(chip);
-      });
-      card.appendChild(chips);
-
-      wrap.appendChild(card);
-    });
-
-    revealOnScroll(wrap.querySelectorAll('.stackm__row'));
-  }
-
-  /* =========================================================
-     10 — COMMAND PALETTE MODAL (⌘K / Ctrl+K)
-     ========================================================= */
-  function initCommandPalette() {
-    var modal = $('palette-modal');
-    var input = $('palette-input');
-    var list = $('palette-results');
-    var openBtn = $('btn-open-palette');
-    if (!modal || !input || !list) return;
-
-    var isPaletteOpen = false;
-    var selectedIndex = 0;
-    var commands = [];
-
-    // Build searchable catalog
-    PROJECTS.forEach(function (p) {
-      commands.push({
-        type: 'project',
-        title: p.name,
-        badge: p.zone,
-        action: function () { openProjectDetail(p); }
-      });
-    });
-    commands.push({
-      type: 'nav',
-      title: 'Jump to Project Index',
-      badge: 'Section',
-      action: function () { scrollToSection('index'); }
-    });
-    commands.push({
-      type: 'nav',
-      title: 'Jump to 3D Previews Stage',
-      badge: 'Section',
-      action: function () { scrollToSection('previews'); }
-    });
-    commands.push({
-      type: 'nav',
-      title: 'Jump to Mission Control Status',
-      badge: 'Section',
-      action: function () { scrollToSection('status'); }
-    });
-    commands.push({
-      type: 'nav',
-      title: 'Jump to Build Timeline',
-      badge: 'Section',
-      action: function () { scrollToSection('timeline'); }
-    });
-    commands.push({
-      type: 'nav',
-      title: 'Jump to Under the Hood',
-      badge: 'Section',
-      action: function () { scrollToSection('stack'); }
-    });
-    commands.push({
-      type: 'nav',
-      title: 'Jump to Architecture & Costs',
-      badge: 'Section',
-      action: function () { scrollToSection('architecture'); }
-    });
-    THEMES.forEach(function (t) {
-      commands.push({
-        type: 'theme',
-        title: 'Switch to ' + t.label + ' Theme',
-        badge: 'Atmosphere',
-        action: function () { window.switchThemeById(t.id); }
-      });
-    });
-
-    function openPalette() {
-      isPaletteOpen = true;
-      modal.classList.add('is-open');
-      input.value = '';
-      selectedIndex = 0;
-      renderPaletteResults('');
-      setTimeout(function () { input.focus(); }, 50);
-      playBlip(700, 0.04);
-    }
-
-    function closePalette() {
-      isPaletteOpen = false;
-      modal.classList.remove('is-open');
-    }
-
-    function renderPaletteResults(query) {
-      list.innerHTML = '';
-      var q = query.toLowerCase().trim();
-      var matches = commands.filter(function (cmd) {
-        return !q || cmd.title.toLowerCase().includes(q) || cmd.badge.toLowerCase().includes(q);
-      });
-
-      if (matches.length === 0) {
-        var empty = el('li', 'palette-item');
-        empty.appendChild(el('span', null, 'No matching commands found.'));
-        list.appendChild(empty);
-        return;
-      }
-
-      matches.forEach(function (cmd, idx) {
-        var li = el('li', 'palette-item' + (idx === selectedIndex ? ' is-selected' : ''));
-        var titleWrap = el('span', 'palette-item__title');
-        titleWrap.textContent = cmd.title;
-        li.appendChild(titleWrap);
-
-        var badge = el('span', 'palette-item__badge', cmd.badge);
-        li.appendChild(badge);
-
-        li.addEventListener('click', function () {
-          cmd.action();
-          closePalette();
-        });
-
-        li.addEventListener('mouseenter', function () {
-          selectedIndex = idx;
-          updateSelectedPaletteItem();
-        });
-
-        list.appendChild(li);
-      });
-    }
-
-    function updateSelectedPaletteItem() {
-      list.querySelectorAll('.palette-item').forEach(function (item, idx) {
-        item.classList.toggle('is-selected', idx === selectedIndex);
-      });
-    }
-
-    input.addEventListener('input', function (e) {
-      selectedIndex = 0;
-      renderPaletteResults(e.target.value);
-    });
-
-    input.addEventListener('keydown', function (e) {
-      var items = list.querySelectorAll('.palette-item');
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        selectedIndex = (selectedIndex + 1) % items.length;
-        updateSelectedPaletteItem();
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        selectedIndex = (selectedIndex - 1 + items.length) % items.length;
-        updateSelectedPaletteItem();
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        var selected = items[selectedIndex];
-        if (selected) selected.click();
-      } else if (e.key === 'Escape') {
-        closePalette();
-      }
-    });
-
-    if (openBtn) openBtn.addEventListener('click', openPalette);
-    modal.addEventListener('click', function (e) {
-      if (e.target === modal) closePalette();
-    });
-
-    // Global Keybinding: ⌘K or Ctrl+K or /
-    window.addEventListener('keydown', function (e) {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        if (isPaletteOpen) closePalette();
-        else openPalette();
-      }
-    });
-  }
-
-  /* =========================================================
-     11 — PROJECT DEEP DIVE MODAL DIALOG
-     ========================================================= */
-  function openProjectDetail(p) {
-    var dialog = $('detail-dialog');
-    if (!dialog) return;
-
-    $('detail-modal-banner-img').src = 'assets/previews/' + p.slug + '.jpg?v=2.5';
-    $('detail-modal-banner-img').alt = p.name + ' preview screenshot';
-    $('detail-modal-title').textContent = p.name;
-    $('detail-modal-category').textContent = p.zone + ' • ' + p.year;
-    $('detail-modal-blurb').textContent = p.blurb;
-
-    // Status badge + the plain-English note about what does and doesn't work
-    var statusHost = $('detail-modal-status');
-    if (statusHost) {
-      var meta = statusMeta(p.status);
-      statusHost.className = 'badge-status badge-status--' + meta.tone;
-      statusHost.innerHTML =
-        '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" ' +
-        'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-        meta.icon + '</svg>';
-      statusHost.appendChild(el('span', null, meta.label));
-    }
-
-    var noteEl = $('detail-modal-statusnote');
-    if (noteEl) {
-      noteEl.textContent = p.statusNote || statusMeta(p.status).desc || '';
-      noteEl.style.display = noteEl.textContent ? 'block' : 'none';
-    }
-
-    // Highlights
-    var highList = $('detail-modal-highlights');
-    highList.innerHTML = '';
-    (p.highlights || []).forEach(function (h) {
-      var li = el('li');
-      li.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
-      li.appendChild(el('span', null, h));
-      highList.appendChild(li);
-    });
-
-    // What's next — hidden entirely when a project has nothing queued
-    var nextWrap = $('detail-modal-next-wrap');
-    var nextList = $('detail-modal-next');
-    if (nextWrap && nextList) {
-      nextList.innerHTML = '';
-      var nextItems = p.next || [];
-      if (nextItems.length) {
-        nextItems.forEach(function (n) {
-          var li = el('li');
-          li.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
-          li.appendChild(el('span', null, n));
-          nextList.appendChild(li);
-        });
-        nextWrap.style.display = 'block';
-      } else {
-        nextWrap.style.display = 'none';
-      }
-    }
-
-    // Specs
-    var specsWrap = $('detail-modal-specs');
-    specsWrap.innerHTML = '';
-    if (p.specs) {
-      Object.keys(p.specs).forEach(function (key) {
-        var box = el('div', 'detail-spec-item');
-        box.appendChild(el('span', 'detail-spec-item__lbl', key));
-        box.appendChild(el('span', 'detail-spec-item__val', p.specs[key]));
-        specsWrap.appendChild(box);
-      });
-    }
-
-    // Launch Link — only shown when there is somewhere real to go
-    var launchBtn = $('detail-modal-launch');
-    if (p.url) {
-      launchBtn.href = p.url;
-      launchBtn.style.display = 'inline-flex';
-      launchBtn.textContent = 'Launch Live Project ↗';
-    } else {
-      launchBtn.removeAttribute('href');
-      launchBtn.style.display = 'none';
-    }
-
-    // Source link — set only for repos verified public, so it never 404s
-    var ghBtn = $('detail-modal-github');
-    if (ghBtn) {
-      if (p.github) {
-        ghBtn.href = p.github;
-        ghBtn.style.display = 'inline-flex';
-      } else {
-        ghBtn.removeAttribute('href');
-        ghBtn.style.display = 'none';
-      }
-    }
-
-    dialog.showModal();
-    playBlip(750, 0.05);
-
-    $('btn-close-detail').onclick = function () {
-      dialog.close();
-    };
-    dialog.onclick = function (e) {
-      if (e.target === dialog) dialog.close();
-    };
-  }
-
-  function scrollToSection(id) {
-    var sec = $(id);
-    if (sec) sec.scrollIntoView({ behavior: 'smooth' });
-  }
-
-  /* =========================================================
-     12 — FLOATING NAVIGATION SCROLL WATCHER & LIVE TIME
-     ========================================================= */
-  function initNavWatcher() {
-    var nav = $('nav-header');
-    if (!nav) return;
-
-    window.addEventListener('scroll', function () {
-      if (window.scrollY > 40) {
-        nav.classList.add('is-scrolled');
-      } else {
-        nav.classList.remove('is-scrolled');
-      }
-    }, { passive: true });
-
-    // Live Campus IST Clock
-    var clockEl = $('live-clock');
-    if (clockEl) {
-      function updateTime() {
-        var now = new Date();
-        var ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-        var hrs = String(ist.getHours()).padStart(2, '0');
-        var mins = String(ist.getMinutes()).padStart(2, '0');
-        var secs = String(ist.getSeconds()).padStart(2, '0');
-        clockEl.textContent = hrs + ':' + mins + ':' + secs + ' IST';
-      }
-      updateTime();
-      setInterval(updateTime, 1000);
-    }
-  }
-
-  /* ---------------------------------------------------------
-     INITIALIZATION PIPELINE
-     --------------------------------------------------------- */
-  initAudio();
-  initCursor();
-  initIndex();
-  initSpotlightStage();
-  initRoadmap();
-  initTimeline();
-  initStackMatrix();
-  initArchitecture();
-  initCommandPalette();
-  initNavWatcher();
-
+  /* ---------- BOOT ------------------------------- */
+  loader();
+  hero();
+  runway();
+  indexList();
+  roadmap();
+  timeline();
+  stack();
+  architecture();
+  observe(document);
+  navWatch();
 })();

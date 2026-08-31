@@ -26,6 +26,16 @@ Seven projects, all deployed:
 | IITH Aquatics | aquatics.iith.online | Live |
 | IITH Ruchi | ruchi.iith.online | Testing |
 
+## Design
+
+Overhauled 2026-08-31 to **"The Proving Ground"** — warm bone canvas, warm
+near-black ink, one flame-orange accent (`#FF4A17`), colossal Anton condensed
+display type, and a full-viewport "runway" that turns the seven builds into
+seven hero panels. Body Inter, data JetBrains Mono. `assets/style.css` and
+`assets/app.js` were rewritten from scratch; the previous travertine/Syne
+design is in git history. `?flat` on the URL disables reveal-gating and
+`100svh` sizing for screenshots.
+
 ## Editing it
 
 `assets/data.js` is the single edit point — projects, statuses, roadmap,
