@@ -85,7 +85,7 @@ var PROJECTS = [
       'Live at abhyas.iith.online. Browse, search and the reference shelf work; the contribution flow and the contributor leaderboard are in. The catalogue is still being filled out course by course.',
     year: '2026',
     accentColor: '#F28700',
-    metric: { label: 'Departments', value: '15 mapped' },
+    metric: { label: 'Pages of material', value: '15K+' },
     blurb:
       'Course materials for IIT Hyderabad in one place — lecture notes, past exam papers, assignment solutions and the reference books each course leans on, organised by course and by all 15 of the institute’s departments, with instant search.',
     highlights: [
@@ -178,7 +178,7 @@ var PROJECTS = [
     year: '2026',
     started: 'Jul 2026',
     accentColor: '#0EA5E9',
-    metric: { label: 'Routes mapped', value: '3 routes' },
+    metric: { label: 'Scheduled runs a week', value: '750+' },
     blurb:
       'Campus mobility in a pocket. The free Main Gate to Hostel Circle shuttle, the Patancheru city route and the Miyapur metro feeder — with expandable schedules, countdowns to the next departure, and a QR boarding pass at the end of it.',
     highlights: [
@@ -241,6 +241,43 @@ var PROJECTS = [
     ]
   },
   {
+    slug: 'lane1',
+    logo: 'lane1.svg',
+    name: 'IITH Aquatics',
+    zone: 'Facilities',
+    category: 'Facilities',
+    url: 'https://aquatics.iith.online',
+    github: null,
+    status: 'live',
+    statusNote:
+      'The registration portal is live. Lane 1 — the poolside gate scanner that goes with it — is finished and tested but deliberately not deployed yet.',
+    year: '2026',
+    started: 'Jul 2026',
+    accentColor: '#06B6D4',
+    metric: { label: 'Fee tiers published', value: '10 tiers' },
+    blurb:
+      'Everything needed to get into the SNCC pool on one page: the ten-tier fee structure, slot timings, safety rules and the full sign-up flow. It signposts rather than processes — and a companion gate-scanner app that checks subscribers in at the poolside is built and waiting for a home.',
+    highlights: [
+      'Ten-tier fee structure broken down per category, wrapped in a guided four-step sign-up',
+      'Pool timings and safety rules published in one authoritative place instead of a circulated PDF',
+      'Lane 1 companion app: PIN-gated, installable to a home screen, and fully operational offline',
+      'Computes membership expiry that the pool’s own records never store — chaining renewals in date order against a fee table, with grace periods and manual overrides',
+      'Looks a member up by roll number from a USB barcode scanner or typed by hand at the gate'
+    ],
+    stack: ['Static HTML/CSS/JS', 'Google Sheets', 'Apps Script', 'Offline PWA'],
+    specs: {
+      'fee tiers': '10 published',
+      'sign-up': '4 steps',
+      companion: 'Built, not deployed',
+      'build step': 'None'
+    },
+    next: [
+      'Find Lane 1 a home and onboard the gate staff',
+      'Replace the third-party payment QR with a committed static image',
+      'Write down who receives the form responses and holds the accounts — it matters when whoever runs it graduates'
+    ]
+  },
+  {
     slug: 'mess',
     logo: 'mess.svg',
     name: 'IITH Ruchi',
@@ -277,43 +314,6 @@ var PROJECTS = [
       'À la carte extras beyond the standard thali',
       'Cuisine tags per item, so today is legible at a glance',
       'Calorie and nutrition information per item'
-    ]
-  },
-  {
-    slug: 'lane1',
-    logo: 'lane1.svg',
-    name: 'IITH Aquatics',
-    zone: 'Facilities',
-    category: 'Facilities',
-    url: 'https://aquatics.iith.online',
-    github: null,
-    status: 'live',
-    statusNote:
-      'The registration portal is live. Lane 1 — the poolside gate scanner that goes with it — is finished and tested but deliberately not deployed yet.',
-    year: '2026',
-    started: 'Jul 2026',
-    accentColor: '#06B6D4',
-    metric: { label: 'Fee tiers published', value: '10 tiers' },
-    blurb:
-      'Everything needed to get into the SNCC pool on one page: the ten-tier fee structure, slot timings, safety rules and the full sign-up flow. It signposts rather than processes — and a companion gate-scanner app that checks subscribers in at the poolside is built and waiting for a home.',
-    highlights: [
-      'Ten-tier fee structure broken down per category, wrapped in a guided four-step sign-up',
-      'Pool timings and safety rules published in one authoritative place instead of a circulated PDF',
-      'Lane 1 companion app: PIN-gated, installable to a home screen, and fully operational offline',
-      'Computes membership expiry that the pool’s own records never store — chaining renewals in date order against a fee table, with grace periods and manual overrides',
-      'Looks a member up by roll number from a USB barcode scanner or typed by hand at the gate'
-    ],
-    stack: ['Static HTML/CSS/JS', 'Google Sheets', 'Apps Script', 'Offline PWA'],
-    specs: {
-      'fee tiers': '10 published',
-      'sign-up': '4 steps',
-      companion: 'Built, not deployed',
-      'build step': 'None'
-    },
-    next: [
-      'Find Lane 1 a home and onboard the gate staff',
-      'Replace the third-party payment QR with a committed static image',
-      'Write down who receives the form responses and holds the accounts — it matters when whoever runs it graduates'
     ]
   }
 ];

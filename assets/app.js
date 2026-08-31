@@ -60,24 +60,28 @@
   function runway() {
     var host = $('#panels');
     PROJECTS.forEach(function (p, i) {
-      var pn = el('article', 'panel');
+      var wip = p.status === 'testing' || p.status === 'soon' || p.status === 'building';
+      var pn = el('article', 'panel' + (wip ? ' panel--wip' : ''));
       pn.id = 'build-' + p.slug;
-      var launch = p.url ? '<a class="btn btn--flame" href="' + esc(p.url) + '" target="_blank" rel="noopener">Launch ↗</a>' : '';
+      var cta = wip
+        ? (p.url ? '<a class="btn btn--ghost" href="' + esc(p.url) + '" target="_blank" rel="noopener">Preview ↗</a>' : '')
+        : (p.url ? '<a class="btn btn--flame" href="' + esc(p.url) + '" target="_blank" rel="noopener">Launch ↗</a>' : '');
       var src = p.github ? '<a class="btn btn--ghost" href="' + esc(p.github) + '" target="_blank" rel="noopener">Source ↗</a>' : '';
       pn.innerHTML =
         '<div class="panel__ghost" aria-hidden="true">' + pad(i + 1) + '</div>' +
         '<div class="panel__body reveal">' +
-          '<div class="panel__cat">' + pad(i + 1) + ' / ' + esc(p.zone) + '</div>' +
+          '<div class="panel__cat">' + pad(i + 1) + ' / ' + esc(p.zone) + (wip ? ' / <span class="panel__wiptag">In development</span>' : '') + '</div>' +
           '<h3 class="panel__name">' + esc(p.name) + '</h3>' +
           '<p class="panel__lede">' + esc(p.blurb) + '</p>' +
           '<div class="panel__stat"><b class="tnum">' + esc(p.metric.value) + '</b><span>' + esc(p.metric.label) + '</span></div>' +
           '<div class="panel__chips">' + (p.stack || []).map(function (s) { return '<span>' + esc(s) + '</span>'; }).join('') + '</div>' +
-          '<div class="panel__cta">' + launch + src + '<span style="align-self:center">' + chip(p.status) + '</span></div>' +
+          '<div class="panel__cta">' + cta + src + '<span style="align-self:center">' + chip(p.status) + '</span></div>' +
         '</div>' +
         '<div class="panel__media reveal reveal-wipe">' +
           '<div class="panel__frame">' +
             '<div class="panel__bar"><i></i><i></i><i></i><span>' + (p.url ? esc(p.url.replace(/^https?:\/\//, '')) : 'not yet deployed') + '</span></div>' +
             '<img src="' + pv(p.slug) + '" alt="Screenshot of ' + esc(p.name) + '" loading="' + (i === 0 ? 'eager' : 'lazy') + '">' +
+            (wip ? '<div class="panel__cover"><span>Coming soon</span><small>Still being built</small></div>' : '') +
           '</div>' +
         '</div>';
       host.appendChild(pn);
@@ -122,20 +126,20 @@
   function roadmap() {
     var grid = $('#board');
     BOARD.forEach(function (col) {
-      var w = el('div', 'reveal');
-      w.innerHTML = '<div class="col__head"><h3>' + esc(col.title) + '</h3><span>' + col.items.length + '</span></div>';
-      col.items.forEach(function (it) {
-        var h = '<div class="bcard__top"><h4>' + esc(it.title) + (it.isNew ? '<span class="bcard__new">NEW</span>' : '') + '</h4>' +
-          (it.date ? '<span class="bcard__date">' + esc(it.date) + '</span>' : '') + '</div>' +
-          '<p class="bcard__body">' + esc(it.body) + '</p>';
-        if (typeof it.progress === 'number') {
-          h += '<div class="pbar"><i style="width:' + it.progress + '%"></i></div><div class="pnote">' + esc(it.progressNote || (it.progress + '%')) + '</div>';
-        } else if (it.meta) {
-          h += '<div class="bmeta">' + esc(it.meta.text) + '</div>';
-        }
-        if (it.tags) h += '<div class="bcard__tags">' + it.tags.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>';
-        w.appendChild(el('div', 'bcard', h));
-      });
+      var w = el('div', 'bcol reveal');
+      var rows = col.items.map(function (it) {
+        var right = it.date
+          ? '<span class="brow__date">' + esc(it.date) + '</span>'
+          : (it.meta ? '<span class="brow__meta is-' + esc(it.meta.state || '') + '">' + esc(it.meta.text) + '</span>' : '');
+        var prog = (typeof it.progress === 'number')
+          ? '<div class="pbar"><i style="width:' + it.progress + '%"></i></div><div class="pnote">' + esc(it.progressNote || (it.progress + '%')) + '</div>'
+          : '';
+        return '<li class="brow">' +
+          '<div class="brow__top"><span class="brow__title">' + esc(it.title) +
+            (it.isNew ? ' <span class="bcard__new">NEW</span>' : '') + '</span>' + right + '</div>' + prog + '</li>';
+      }).join('');
+      w.innerHTML = '<div class="col__head"><h3>' + esc(col.title) + '</h3><span>' + col.items.length + '</span></div>' +
+        '<ul class="brows">' + rows + '</ul>';
       grid.appendChild(w);
     });
   }
@@ -160,33 +164,6 @@
         '<div class="srow__note">' + esc(s.note) + '</div>' +
         '<div class="srow__proj">' + s.projects.map(function (p) { return '<span>' + esc(p) + '</span>'; }).join('') + '</div>'));
     });
-  }
-
-  /* ---------- ARCHITECTURE ----------------------- */
-  var ICONS = {
-    zap: '<path d="M13 2 3 14h7l-1 8 10-12h-7z"/>',
-    shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
-    cpu: '<rect x="6" y="6" width="12" height="12" rx="1"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/>',
-    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'
-  };
-  function architecture() {
-    var A = ARCHITECTURE;
-    $('#arch-subline').textContent = A.subline;
-    var pg = $('#pillars');
-    A.pillars.forEach(function (p) {
-      pg.appendChild(el('div', 'pillar reveal',
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[p.icon] || ICONS.zap) + '</svg>' +
-        '<h4>' + esc(p.title) + '</h4><p>' + esc(p.desc) + '</p>'));
-    });
-    var c = A.costs, box = $('#costs');
-    c.items.forEach(function (it) {
-      var amt = it.amount == null ? '&mdash;' : (it.amount === 0 ? 'Free' : c.currency + it.amount.toLocaleString('en-IN'));
-      box.appendChild(el('div', 'costrow',
-        '<div class="costrow__label">' + esc(it.label) + '</div>' +
-        '<div class="costrow__amt tnum">' + amt + ' <small>' + esc(it.period) + '</small></div>' +
-        '<div class="costrow__note">' + esc(it.note) + '</div>'));
-    });
-    box.appendChild(el('div', 'costs__foot', esc(c.totalNote)));
   }
 
   /* ---------- REVEALS + NAV ---------------------- */
@@ -236,7 +213,6 @@
   roadmap();
   timeline();
   stack();
-  architecture();
   observe(document);
   navWatch();
 })();
